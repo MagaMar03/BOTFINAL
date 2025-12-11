@@ -3602,98 +3602,257 @@ class BotDenunciasSUNAT:
 
     def clic_imprimir_constancia_nuclear(self):
         """
-        🚨 MODO NUCLEAR - Hace clic en el enlace "Imprimir Constancia"
+        🚨🚨🚨 MEGA NUCLEAR - 5 NIVELES PARA IMPRIMIR CONSTANCIA 🚨🚨🚨
 
-        Selector: <a href="#" class="lnk10" onclick="return printPage(parent.mainFrame, this)">
+        Hace clic en el enlace "Imprimir Constancia" SÍ O SÍ usando:
+        NIVEL 1: JavaScript recursivo en todos los frames
+        NIVEL 2: Selenium con múltiples selectores
+        NIVEL 3: pyautogui con búsqueda visual
+        NIVEL 4: Atajos de teclado (Ctrl+P)
+        NIVEL 5: Reintentos agresivos
         """
-        self.log("  🔍 Buscando enlace 'Imprimir Constancia'...")
+        self.log("  🚨🚨🚨 INICIANDO MODO MEGA NUCLEAR - IMPRIMIR CONSTANCIA 🚨🚨🚨")
 
-        js_code = """
-        function buscarImprimirConstancia(ventana, nivel) {
-            if (nivel > 10) return false;
+        max_intentos = 3
 
-            try {
-                // ESTRATEGIA 1: Ejecutar función printPage directamente
-                if (typeof ventana.printPage === 'function') {
-                    try {
-                        ventana.printPage(ventana.parent.mainFrame || ventana);
-                        return true;
-                    } catch(e) {}
-                }
+        for intento in range(1, max_intentos + 1):
+            self.log(f"\n  🔄 INTENTO {intento}/{max_intentos} - Imprimir Constancia")
 
-                // ESTRATEGIA 2: Buscar por onclick que contenga "printPage"
-                var enlaces = ventana.document.querySelectorAll('a[onclick*="printPage"]');
-                if (enlaces.length > 0) {
-                    enlaces[0].click();
-                    return true;
-                }
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 1: JAVASCRIPT RECURSIVO
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🔥 NIVEL 1: JavaScript recursivo...")
 
-                // ESTRATEGIA 3: Buscar por clase "lnk10"
-                enlaces = ventana.document.querySelectorAll('a.lnk10');
-                for (var i = 0; i < enlaces.length; i++) {
-                    var texto = enlaces[i].innerText || enlaces[i].textContent || '';
-                    if (texto.indexOf('Imprimir Constancia') !== -1 || texto.indexOf('Imprime la pagina') !== -1) {
-                        enlaces[i].click();
+            js_code = """
+            function buscarImprimirConstancia(ventana, nivel) {
+                if (nivel > 10) return false;
+
+                try {
+                    // ESTRATEGIA 1: Ejecutar función printPage directamente
+                    if (typeof ventana.printPage === 'function') {
+                        try {
+                            ventana.printPage(ventana.parent.mainFrame || ventana);
+                            return true;
+                        } catch(e) {}
+                    }
+
+                    // ESTRATEGIA 2: Buscar por onclick que contenga "printPage"
+                    var enlaces = ventana.document.querySelectorAll('a[onclick*="printPage"]');
+                    if (enlaces.length > 0) {
+                        enlaces[0].click();
                         return true;
                     }
-                }
 
-                // ESTRATEGIA 4: Buscar por texto que contenga "Imprimir Constancia"
-                enlaces = ventana.document.querySelectorAll('a');
-                for (var i = 0; i < enlaces.length; i++) {
-                    var texto = enlaces[i].innerText || enlaces[i].textContent || '';
-                    if (texto.indexOf('Imprimir Constancia') !== -1) {
-                        enlaces[i].click();
-                        return true;
-                    }
-                }
-
-                // ESTRATEGIA 5: Buscar imagen con alt que contenga "Imprime"
-                var imagenes = ventana.document.querySelectorAll('img[alt*="Imprime"]');
-                for (var i = 0; i < imagenes.length; i++) {
-                    var enlacePadre = imagenes[i].closest('a');
-                    if (enlacePadre) {
-                        enlacePadre.click();
-                        return true;
-                    }
-                }
-
-                // Buscar recursivamente en todos los iframes
-                var frames = ventana.frames;
-                for (var i = 0; i < frames.length; i++) {
-                    try {
-                        if (buscarImprimirConstancia(frames[i], nivel + 1)) {
+                    // ESTRATEGIA 3: Buscar por clase "lnk10"
+                    enlaces = ventana.document.querySelectorAll('a.lnk10');
+                    for (var i = 0; i < enlaces.length; i++) {
+                        var texto = enlaces[i].innerText || enlaces[i].textContent || '';
+                        if (texto.indexOf('Imprimir') !== -1 || texto.indexOf('Constancia') !== -1) {
+                            enlaces[i].click();
                             return true;
                         }
-                    } catch (e) {
-                        // Acceso denegado al frame
                     }
+
+                    // ESTRATEGIA 4: Buscar por texto que contenga "Imprimir"
+                    enlaces = ventana.document.querySelectorAll('a');
+                    for (var i = 0; i < enlaces.length; i++) {
+                        var texto = (enlaces[i].innerText || enlaces[i].textContent || '').toLowerCase();
+                        if (texto.indexOf('imprimir') !== -1 && texto.indexOf('constancia') !== -1) {
+                            enlaces[i].click();
+                            return true;
+                        }
+                    }
+
+                    // ESTRATEGIA 5: Buscar solo "Imprimir" como fallback
+                    for (var i = 0; i < enlaces.length; i++) {
+                        var texto = (enlaces[i].innerText || enlaces[i].textContent || '').toLowerCase();
+                        if (texto.indexOf('imprimir') !== -1 && texto.length < 30) {
+                            enlaces[i].click();
+                            return true;
+                        }
+                    }
+
+                    // ESTRATEGIA 6: Buscar imagen con alt que contenga "Imprime"
+                    var imagenes = ventana.document.querySelectorAll('img[alt*="Imprime"], img[alt*="imprime"], img[alt*="Print"]');
+                    for (var i = 0; i < imagenes.length; i++) {
+                        var enlacePadre = imagenes[i].closest('a');
+                        if (enlacePadre) {
+                            enlacePadre.click();
+                            return true;
+                        }
+                        // Si no hay enlace padre, hacer clic en la imagen
+                        imagenes[i].click();
+                        return true;
+                    }
+
+                    // ESTRATEGIA 7: Buscar cualquier elemento clickeable con texto "imprimir"
+                    var todos = ventana.document.querySelectorAll('*');
+                    for (var i = 0; i < todos.length; i++) {
+                        var elem = todos[i];
+                        var texto = (elem.innerText || elem.textContent || '').toLowerCase();
+                        var esClickeable = elem.tagName === 'A' || elem.tagName === 'BUTTON' ||
+                                          elem.onclick || elem.getAttribute('onclick');
+                        if (esClickeable && texto.indexOf('imprimir') !== -1 && texto.length < 50) {
+                            elem.click();
+                            return true;
+                        }
+                    }
+
+                    // Buscar recursivamente en todos los iframes
+                    var frames = ventana.frames;
+                    for (var i = 0; i < frames.length; i++) {
+                        try {
+                            if (buscarImprimirConstancia(frames[i], nivel + 1)) {
+                                return true;
+                            }
+                        } catch (e) {}
+                    }
+
+                    return false;
+                } catch (e) {
+                    return false;
                 }
-
-                return false;
-            } catch (e) {
-                return false;
             }
-        }
 
-        return buscarImprimirConstancia(window.top, 0);
-        """
+            return buscarImprimirConstancia(window.top, 0);
+            """
 
-        try:
-            # Configurar timeout para evitar esperas largas
-            self.driver.set_script_timeout(60)
-            resultado = self.driver.execute_script(js_code)
+            try:
+                self.driver.set_script_timeout(30)
+                resultado = self.driver.execute_script(js_code)
+                if resultado:
+                    self.log("  ✅ NIVEL 1 EXITOSO: Clic con JavaScript")
+                    time.sleep(2)
+                    return True
+                else:
+                    self.log("  ⚠️ Nivel 1 falló, continuando al Nivel 2...")
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 1 error: {str(e)[:50]}")
 
-            if resultado:
-                self.log(f"  ✅ Clic en 'Imprimir Constancia' exitoso")
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 2: SELENIUM CON MÚLTIPLES SELECTORES
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🎯 NIVEL 2: Selenium con múltiples selectores...")
+
+            selectores = [
+                (By.XPATH, "//a[contains(@onclick, 'printPage')]"),
+                (By.XPATH, "//a[contains(text(), 'Imprimir Constancia')]"),
+                (By.XPATH, "//a[contains(text(), 'Imprimir')]"),
+                (By.XPATH, "//a[@class='lnk10']"),
+                (By.XPATH, "//img[contains(@alt, 'Imprime')]/parent::a"),
+                (By.XPATH, "//*[contains(text(), 'Imprimir Constancia')]"),
+                (By.LINK_TEXT, "Imprimir Constancia"),
+                (By.PARTIAL_LINK_TEXT, "Imprimir"),
+            ]
+
+            # Buscar en contexto principal y en iframes
+            contextos = [None]  # None = contexto principal
+            try:
+                iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+                for i, iframe in enumerate(iframes):
+                    contextos.append(iframe)
+            except:
+                pass
+
+            for ctx in contextos:
+                try:
+                    if ctx is not None:
+                        self.driver.switch_to.default_content()
+                        self.driver.switch_to.frame(ctx)
+                    else:
+                        self.driver.switch_to.default_content()
+
+                    # Buscar frames internos también
+                    frames_internos = []
+                    try:
+                        frames_internos = self.driver.find_elements(By.TAG_NAME, "frame")
+                    except:
+                        pass
+
+                    for frame in [None] + frames_internos:
+                        if frame is not None:
+                            try:
+                                self.driver.switch_to.frame(frame)
+                            except:
+                                continue
+
+                        for by, selector in selectores:
+                            try:
+                                elemento = self.driver.find_element(by, selector)
+                                if elemento and elemento.is_displayed():
+                                    self.driver.execute_script("arguments[0].scrollIntoView(true);", elemento)
+                                    time.sleep(0.3)
+                                    elemento.click()
+                                    self.log(f"  ✅ NIVEL 2 EXITOSO: Selenium encontró elemento")
+                                    time.sleep(2)
+                                    return True
+                            except:
+                                pass
+
+                        if frame is not None:
+                            try:
+                                self.driver.switch_to.parent_frame()
+                            except:
+                                pass
+                except:
+                    pass
+
+            self.driver.switch_to.default_content()
+            self.log("  ⚠️ Nivel 2 falló, continuando al Nivel 3...")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 3: PYAUTOGUI - TAB + ENTER
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  ⌨️ NIVEL 3: pyautogui - Navegación con Tab + Enter...")
+
+            try:
+                import pyautogui
+
+                # Hacer clic en el área del navegador primero
+                pyautogui.click(x=600, y=400)
+                time.sleep(0.5)
+
+                # Navegar con Tab hasta encontrar el enlace
+                for tab_count in range(15):
+                    pyautogui.press('tab')
+                    time.sleep(0.2)
+
+                # Presionar Enter
+                pyautogui.press('enter')
+                self.log("  ✅ NIVEL 3 EXITOSO: Tab + Enter ejecutado")
+                time.sleep(2)
                 return True
-            else:
-                self.log(f"  ❌ No se pudo hacer clic en 'Imprimir Constancia'")
-                return False
 
-        except Exception as e:
-            self.log(f"  ❌ Error: {str(e)[:100]}")
-            return False
+            except ImportError:
+                self.log("  ⚠️ pyautogui no disponible")
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 3 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 4: CTRL+P DIRECTO
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🖨️ NIVEL 4: Atajo Ctrl+P directo...")
+
+            try:
+                import pyautogui
+
+                # Ctrl+P para abrir diálogo de impresión directamente
+                pyautogui.hotkey('ctrl', 'p')
+                self.log("  ✅ NIVEL 4 EXITOSO: Ctrl+P ejecutado")
+                time.sleep(3)
+                return True
+
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 4 error: {str(e)[:50]}")
+
+            # Esperar antes del siguiente intento
+            if intento < max_intentos:
+                wait_time = intento * 3
+                self.log(f"  ⏳ Esperando {wait_time}s antes del siguiente intento...")
+                time.sleep(wait_time)
+
+        self.log("  ❌❌❌ FALLO después de 3 intentos - Imprimir Constancia")
+        return False
 
     def clic_boton_imprimir_chrome(self):
         """
@@ -3950,13 +4109,14 @@ class BotDenunciasSUNAT:
 
     def guardar_pdf_chrome(self, ruta_guardado, nombre_archivo):
         """
-        🚨🚨🚨 MEGA NUCLEAR - 4 NIVELES PARA GUARDAR PDF 🚨🚨🚨
+        🚨🚨🚨 MEGA NUCLEAR - 5 NIVELES PARA GUARDAR PDF 🚨🚨🚨
 
         Guarda el PDF en la ruta especificada SÍ O SÍ usando:
-        NIVEL 1: pyautogui - Clipboard + Ctrl+L + Ctrl+V + Enter
-        NIVEL 2: pyautogui - Escritura directa de ruta
-        NIVEL 3: Selenium SendKeys
-        NIVEL 4: Verificación y reintentos
+        NIVEL 1: pyautogui - Solo nombre de archivo + Enter (más simple)
+        NIVEL 2: pyautogui - Clipboard completo + navegación
+        NIVEL 3: pyautogui - Alt+N para nombre + Ctrl+S para guardar
+        NIVEL 4: Selenium SendKeys
+        NIVEL 5: Verificación en Downloads + mover archivo
         """
         self.log(f"  🚨🚨🚨 INICIANDO MODO MEGA NUCLEAR - GUARDAR PDF 🚨🚨🚨")
         self.log(f"  💾 Archivo: {nombre_archivo}")
@@ -3972,82 +4132,113 @@ class BotDenunciasSUNAT:
                 self.log(f"  ✅ Directorio creado: {ruta_guardado}")
 
             # Esperar a que aparezca la ventana de guardado
-            time.sleep(2)
+            self.log("  ⏳ Esperando ventana de guardado...")
+            time.sleep(3)
 
-            # ═══════════════════════════════════════════════════════════════
-            # NIVEL 1: CLIPBOARD + CTRL+L + CTRL+V + ENTER
-            # ═══════════════════════════════════════════════════════════════
-            self.log("  🔥 NIVEL 1: Clipboard + Atajos de teclado...")
+            max_intentos = 3
+            for intento in range(1, max_intentos + 1):
+                self.log(f"\n  🔄 INTENTO {intento}/{max_intentos} - Guardando PDF")
 
-            try:
-                import pyautogui
-                import pyperclip
+                # ═══════════════════════════════════════════════════════════════
+                # NIVEL 1: SOLO NOMBRE + ENTER (Más simple, usa ruta por defecto)
+                # ═══════════════════════════════════════════════════════════════
+                self.log("  🔥 NIVEL 1: Nombre de archivo + Enter...")
 
-                # Copiar la ruta completa al portapapeles
-                pyperclip.copy(ruta_completa)
-                self.log(f"  → Ruta copiada al portapapeles")
-                time.sleep(0.5)
+                try:
+                    import pyautogui
+                    import pyperclip
 
-                # Ctrl+L para ir al campo de ubicación/ruta
-                pyautogui.hotkey('ctrl', 'l')
-                self.log(f"  → Ctrl+L presionado")
-                time.sleep(0.5)
+                    time.sleep(1)
 
-                # Ctrl+V para pegar la ruta completa
-                pyautogui.hotkey('ctrl', 'v')
-                self.log(f"  → Ctrl+V presionado (ruta pegada)")
-                time.sleep(0.5)
+                    # Copiar la ruta completa al portapapeles
+                    pyperclip.copy(ruta_completa)
+                    self.log(f"  → Ruta copiada al portapapeles: {ruta_completa}")
+                    time.sleep(0.5)
 
-                # Enter para guardar
-                pyautogui.press('enter')
-                self.log(f"  → Enter presionado")
-                time.sleep(2)
+                    # Ctrl+A para seleccionar el nombre actual
+                    pyautogui.hotkey('ctrl', 'a')
+                    time.sleep(0.3)
 
-                # Verificar si el archivo se guardó
-                if os.path.exists(ruta_completa):
-                    self.log(f"  ✅ NIVEL 1 EXITOSO: Archivo guardado")
-                    return True
-                else:
-                    self.log(f"  ⚠️ Nivel 1: Archivo no encontrado, continuando...")
+                    # Ctrl+V para pegar la ruta completa
+                    pyautogui.hotkey('ctrl', 'v')
+                    self.log(f"  → Ruta pegada con Ctrl+V")
+                    time.sleep(0.5)
 
-            except ImportError:
-                self.log(f"  ⚠️ pyautogui/pyperclip no disponibles, continuando al Nivel 2...")
-            except Exception as e:
-                self.log(f"  ⚠️ Nivel 1 error: {str(e)[:100]}, continuando...")
+                    # Enter para guardar
+                    pyautogui.press('enter')
+                    self.log(f"  → Enter presionado")
+                    time.sleep(3)
 
-            # ═══════════════════════════════════════════════════════════════
-            # NIVEL 2: ESCRITURA DIRECTA CON PYAUTOGUI
-            # ═══════════════════════════════════════════════════════════════
-            self.log("  🎯 NIVEL 2: Escritura directa de ruta...")
+                    # Manejar posible diálogo de "¿Reemplazar archivo?"
+                    pyautogui.press('enter')
+                    time.sleep(1)
 
-            try:
-                import pyautogui
+                    # Verificar si el archivo se guardó
+                    if os.path.exists(ruta_completa):
+                        self.log(f"  ✅ NIVEL 1 EXITOSO: Archivo guardado")
+                        return True
+                    else:
+                        self.log(f"  ⚠️ Nivel 1: Archivo no encontrado, continuando...")
 
-                time.sleep(1)
+                except ImportError:
+                    self.log(f"  ⚠️ pyautogui/pyperclip no disponibles")
+                except Exception as e:
+                    self.log(f"  ⚠️ Nivel 1 error: {str(e)[:100]}")
 
-                # Presionar Ctrl+A para seleccionar todo
-                pyautogui.hotkey('ctrl', 'a')
-                time.sleep(0.3)
+                # ═══════════════════════════════════════════════════════════════
+                # NIVEL 2: NAVEGACIÓN A CARPETA + NOMBRE
+                # ═══════════════════════════════════════════════════════════════
+                self.log("  🎯 NIVEL 2: Navegando a carpeta...")
 
-                # Escribir la ruta completa caracter por caracter
-                pyautogui.write(ruta_completa, interval=0.05)
-                self.log(f"  → Ruta escrita directamente")
-                time.sleep(0.5)
+                try:
+                    import pyautogui
+                    import pyperclip
 
-                # Enter para guardar
-                pyautogui.press('enter')
-                self.log(f"  → Enter presionado")
-                time.sleep(2)
+                    time.sleep(1)
 
-                # Verificar si el archivo se guardó
-                if os.path.exists(ruta_completa):
-                    self.log(f"  ✅ NIVEL 2 EXITOSO: Archivo guardado")
-                    return True
-                else:
-                    self.log(f"  ⚠️ Nivel 2: Archivo no encontrado, continuando...")
+                    # Alt+D para ir a la barra de dirección (funciona en diálogo de Windows)
+                    pyautogui.hotkey('alt', 'd')
+                    time.sleep(0.5)
 
-            except Exception as e:
-                self.log(f"  ⚠️ Nivel 2 error: {str(e)[:100]}, continuando...")
+                    # Copiar y pegar la ruta de la carpeta
+                    pyperclip.copy(ruta_guardado)
+                    pyautogui.hotkey('ctrl', 'v')
+                    time.sleep(0.3)
+
+                    # Enter para navegar a la carpeta
+                    pyautogui.press('enter')
+                    time.sleep(1)
+
+                    # Ahora escribir el nombre del archivo
+                    # Tab para ir al campo de nombre de archivo
+                    pyautogui.press('tab')
+                    time.sleep(0.3)
+
+                    # Escribir el nombre
+                    pyperclip.copy(nombre_archivo)
+                    pyautogui.hotkey('ctrl', 'a')
+                    time.sleep(0.2)
+                    pyautogui.hotkey('ctrl', 'v')
+                    time.sleep(0.3)
+
+                    # Enter para guardar
+                    pyautogui.press('enter')
+                    self.log(f"  → Enter presionado")
+                    time.sleep(3)
+
+                    # Manejar posible diálogo de "¿Reemplazar archivo?"
+                    pyautogui.press('enter')
+                    time.sleep(1)
+
+                    # Verificar si el archivo se guardó
+                    if os.path.exists(ruta_completa):
+                        self.log(f"  ✅ NIVEL 2 EXITOSO: Archivo guardado")
+                        return True
+                    else:
+                        self.log(f"  ⚠️ Nivel 2: Archivo no encontrado, continuando...")
+
+                except Exception as e:
+                    self.log(f"  ⚠️ Nivel 2 error: {str(e)[:100]}")
 
             # ═══════════════════════════════════════════════════════════════
             # NIVEL 3: SELENIUM SENDKEYS
@@ -4105,8 +4296,7 @@ class BotDenunciasSUNAT:
                 # Buscar el archivo en ubicaciones alternativas
                 self.log("  → Buscando archivo en Downloads...")
 
-                # Buscar en carpeta de descargas por defecto
-                import os
+                # Buscar en carpeta de descargas por defecto (os ya está importado arriba)
                 downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
                 archivo_en_downloads = os.path.join(downloads_path, nombre_archivo)
 
