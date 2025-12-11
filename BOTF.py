@@ -3602,98 +3602,287 @@ class BotDenunciasSUNAT:
 
     def clic_imprimir_constancia_nuclear(self):
         """
-        🚨 MODO NUCLEAR - Hace clic en el enlace "Imprimir Constancia"
+        🚨🚨🚨 MEGA NUCLEAR - 4 NIVELES DE ATAQUE 🚨🚨🚨
+
+        Hace clic en "Imprimir Constancia" SÍ O SÍ usando:
+        NIVEL 1: JavaScript rápido y directo (sin recursión larga)
+        NIVEL 2: Ctrl+P - Atajo de teclado para imprimir
+        NIVEL 3: Selenium ActionChains
+        NIVEL 4: window.print() directo
 
         Selector: <a href="#" class="lnk10" onclick="return printPage(parent.mainFrame, this)">
         """
-        self.log("  🔍 Buscando enlace 'Imprimir Constancia'...")
+        self.log("  🚨🚨🚨 INICIANDO MODO MEGA NUCLEAR - IMPRIMIR CONSTANCIA 🚨🚨🚨")
 
-        js_code = """
-        function buscarImprimirConstancia(ventana, nivel) {
-            if (nivel > 10) return false;
+        # ═══════════════════════════════════════════════════════════════
+        # NIVEL 1: JAVASCRIPT RÁPIDO Y DIRECTO
+        # ═══════════════════════════════════════════════════════════════
+        self.log("  🔥 NIVEL 1: JavaScript rápido y directo...")
 
+        js_rapido = """
+        // Búsqueda rápida en contexto actual y frames directos (NO recursión profunda)
+        function buscarRapido() {
+            // ESTRATEGIA 1: Ejecutar función printPage directamente
             try {
-                // ESTRATEGIA 1: Ejecutar función printPage directamente
-                if (typeof ventana.printPage === 'function') {
-                    try {
-                        ventana.printPage(ventana.parent.mainFrame || ventana);
-                        return true;
-                    } catch(e) {}
+                if (typeof window.printPage === 'function') {
+                    window.printPage(window.parent.mainFrame || window);
+                    return {nivel: 1, estrategia: 'printPage() directo', exito: true};
                 }
+            } catch(e) {}
 
-                // ESTRATEGIA 2: Buscar por onclick que contenga "printPage"
-                var enlaces = ventana.document.querySelectorAll('a[onclick*="printPage"]');
+            // ESTRATEGIA 2: Buscar en todos los frames (solo 1 nivel)
+            try {
+                for (var i = 0; i < window.frames.length; i++) {
+                    var frame = window.frames[i];
+                    if (typeof frame.printPage === 'function') {
+                        frame.printPage(frame.parent.mainFrame || frame);
+                        return {nivel: 1, estrategia: 'printPage() en frame', exito: true};
+                    }
+                }
+            } catch(e) {}
+
+            // ESTRATEGIA 3: Buscar por onclick="printPage"
+            try {
+                var enlaces = document.querySelectorAll('a[onclick*="printPage"]');
                 if (enlaces.length > 0) {
                     enlaces[0].click();
-                    return true;
+                    return {nivel: 1, estrategia: 'onclick printPage', exito: true};
                 }
 
-                // ESTRATEGIA 3: Buscar por clase "lnk10"
-                enlaces = ventana.document.querySelectorAll('a.lnk10');
+                // Buscar en iframes
+                for (var i = 0; i < window.frames.length; i++) {
+                    try {
+                        var enlacesFrame = window.frames[i].document.querySelectorAll('a[onclick*="printPage"]');
+                        if (enlacesFrame.length > 0) {
+                            enlacesFrame[0].click();
+                            return {nivel: 1, estrategia: 'onclick printPage en iframe', exito: true};
+                        }
+                    } catch(e) {}
+                }
+            } catch(e) {}
+
+            // ESTRATEGIA 4: Buscar por clase "lnk10" + texto
+            try {
+                var enlaces = document.querySelectorAll('a.lnk10');
                 for (var i = 0; i < enlaces.length; i++) {
                     var texto = enlaces[i].innerText || enlaces[i].textContent || '';
                     if (texto.indexOf('Imprimir Constancia') !== -1 || texto.indexOf('Imprime la pagina') !== -1) {
                         enlaces[i].click();
-                        return true;
+                        return {nivel: 1, estrategia: 'clase lnk10', exito: true};
                     }
                 }
 
-                // ESTRATEGIA 4: Buscar por texto que contenga "Imprimir Constancia"
-                enlaces = ventana.document.querySelectorAll('a');
-                for (var i = 0; i < enlaces.length; i++) {
-                    var texto = enlaces[i].innerText || enlaces[i].textContent || '';
-                    if (texto.indexOf('Imprimir Constancia') !== -1) {
-                        enlaces[i].click();
-                        return true;
-                    }
+                // Buscar en iframes
+                for (var i = 0; i < window.frames.length; i++) {
+                    try {
+                        var enlacesFrame = window.frames[i].document.querySelectorAll('a.lnk10');
+                        for (var j = 0; j < enlacesFrame.length; j++) {
+                            var textoFrame = enlacesFrame[j].innerText || enlacesFrame[j].textContent || '';
+                            if (textoFrame.indexOf('Imprimir Constancia') !== -1) {
+                                enlacesFrame[j].click();
+                                return {nivel: 1, estrategia: 'lnk10 en iframe', exito: true};
+                            }
+                        }
+                    } catch(e) {}
                 }
+            } catch(e) {}
 
-                // ESTRATEGIA 5: Buscar imagen con alt que contenga "Imprime"
-                var imagenes = ventana.document.querySelectorAll('img[alt*="Imprime"]');
+            // ESTRATEGIA 5: Buscar imagen con alt="Imprime"
+            try {
+                var imagenes = document.querySelectorAll('img[alt*="Imprime"]');
                 for (var i = 0; i < imagenes.length; i++) {
                     var enlacePadre = imagenes[i].closest('a');
                     if (enlacePadre) {
                         enlacePadre.click();
-                        return true;
+                        return {nivel: 1, estrategia: 'imagen impresora', exito: true};
                     }
                 }
 
-                // Buscar recursivamente en todos los iframes
-                var frames = ventana.frames;
-                for (var i = 0; i < frames.length; i++) {
+                // Buscar en iframes
+                for (var i = 0; i < window.frames.length; i++) {
                     try {
-                        if (buscarImprimirConstancia(frames[i], nivel + 1)) {
-                            return true;
+                        var imagenesFrame = window.frames[i].document.querySelectorAll('img[alt*="Imprime"]');
+                        for (var j = 0; j < imagenesFrame.length; j++) {
+                            var enlacePadreFrame = imagenesFrame[j].closest('a');
+                            if (enlacePadreFrame) {
+                                enlacePadreFrame.click();
+                                return {nivel: 1, estrategia: 'imagen en iframe', exito: true};
+                            }
                         }
-                    } catch (e) {
-                        // Acceso denegado al frame
-                    }
+                    } catch(e) {}
                 }
+            } catch(e) {}
 
-                return false;
-            } catch (e) {
-                return false;
-            }
+            return {nivel: 1, estrategia: 'Ninguna', exito: false};
         }
 
-        return buscarImprimirConstancia(window.top, 0);
+        return buscarRapido();
         """
 
         try:
-            # Configurar timeout para evitar esperas largas
-            self.driver.set_script_timeout(60)
-            resultado = self.driver.execute_script(js_code)
+            self.driver.set_script_timeout(15)  # Solo 15 segundos para nivel 1
+            resultado_nivel1 = self.driver.execute_script(js_rapido)
 
-            if resultado:
-                self.log(f"  ✅ Clic en 'Imprimir Constancia' exitoso")
+            if resultado_nivel1 and resultado_nivel1.get('exito'):
+                self.log(f"  ✅ NIVEL 1 EXITOSO: {resultado_nivel1['estrategia']}")
+                time.sleep(2)  # Esperar a que aparezca diálogo
                 return True
             else:
-                self.log(f"  ❌ No se pudo hacer clic en 'Imprimir Constancia'")
-                return False
+                self.log(f"  ⚠️ Nivel 1 falló, continuando al Nivel 2...")
+        except Exception as e:
+            self.log(f"  ⚠️ Nivel 1 error: {str(e)[:100]}, continuando...")
+
+        # ═══════════════════════════════════════════════════════════════
+        # NIVEL 2: CTRL+P - ATAJO DE TECLADO
+        # ═══════════════════════════════════════════════════════════════
+        self.log("  ⌨️ NIVEL 2: Ctrl+P - Atajo de teclado para imprimir...")
+
+        try:
+            import pyautogui
+
+            # Método 1: pyautogui
+            try:
+                self.log("  → Intentando con pyautogui...")
+                pyautogui.hotkey('ctrl', 'p')
+                self.log("  ✅ NIVEL 2 EXITOSO: Ctrl+P con pyautogui")
+                time.sleep(2)
+                return True
+            except ImportError:
+                self.log("  ⚠️ pyautogui no disponible, intentando con Selenium...")
 
         except Exception as e:
-            self.log(f"  ❌ Error: {str(e)[:100]}")
-            return False
+            self.log(f"  ⚠️ Nivel 2 error: {str(e)[:100]}, continuando...")
+
+        # Método 2: Selenium ActionChains
+        try:
+            from selenium.webdriver.common.keys import Keys
+            from selenium.webdriver.common.action_chains import ActionChains
+
+            self.log("  → Intentando Ctrl+P con Selenium...")
+            actions = ActionChains(self.driver)
+            actions.key_down(Keys.CONTROL).send_keys('p').key_up(Keys.CONTROL).perform()
+            self.log("  ✅ NIVEL 2 EXITOSO: Ctrl+P con Selenium")
+            time.sleep(2)
+            return True
+
+        except Exception as e:
+            self.log(f"  ⚠️ Nivel 2 Selenium error: {str(e)[:100]}, continuando...")
+
+        # ═══════════════════════════════════════════════════════════════
+        # NIVEL 3: SELENIUM ACTIONCHAINS - BUSCAR Y HACER CLIC
+        # ═══════════════════════════════════════════════════════════════
+        self.log("  🎯 NIVEL 3: Selenium ActionChains - Búsqueda y clic...")
+
+        try:
+            # Cambiar a iframe principal si existe
+            try:
+                iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+                if iframes:
+                    self.log(f"  → Encontrados {len(iframes)} iframes, cambiando al primero...")
+                    self.driver.switch_to.frame(iframes[0])
+            except:
+                pass
+
+            # Buscar el enlace con Selenium
+            try:
+                enlace = self.wait.until(
+                    EC.presence_of_element_located((By.XPATH, "//a[contains(@onclick, 'printPage')]"))
+                )
+                enlace.click()
+                self.log("  ✅ NIVEL 3 EXITOSO: Clic con Selenium")
+                self.driver.switch_to.default_content()
+                time.sleep(2)
+                return True
+            except:
+                pass
+
+            # Intentar por texto
+            try:
+                enlace = self.wait.until(
+                    EC.presence_of_element_located((By.XPATH, "//a[contains(text(), 'Imprimir Constancia')]"))
+                )
+                enlace.click()
+                self.log("  ✅ NIVEL 3 EXITOSO: Clic con Selenium por texto")
+                self.driver.switch_to.default_content()
+                time.sleep(2)
+                return True
+            except:
+                pass
+
+            # Intentar por imagen
+            try:
+                enlace = self.wait.until(
+                    EC.presence_of_element_located((By.XPATH, "//img[contains(@alt, 'Imprime')]//ancestor::a"))
+                )
+                enlace.click()
+                self.log("  ✅ NIVEL 3 EXITOSO: Clic con Selenium por imagen")
+                self.driver.switch_to.default_content()
+                time.sleep(2)
+                return True
+            except:
+                pass
+
+            self.driver.switch_to.default_content()
+            self.log(f"  ⚠️ Nivel 3 falló, continuando al Nivel 4...")
+
+        except Exception as e:
+            self.log(f"  ⚠️ Nivel 3 error: {str(e)[:100]}, continuando...")
+            try:
+                self.driver.switch_to.default_content()
+            except:
+                pass
+
+        # ═══════════════════════════════════════════════════════════════
+        # NIVEL 4: WINDOW.PRINT() DIRECTO
+        # ═══════════════════════════════════════════════════════════════
+        self.log("  🚀 NIVEL 4: window.print() directo - Último recurso...")
+
+        try:
+            # Intentar window.print() en todos los contextos posibles
+            js_window_print = """
+            // Intentar en window principal
+            try {
+                window.print();
+                return {nivel: 4, estrategia: 'window.print()', exito: true};
+            } catch(e) {}
+
+            // Intentar en todos los frames
+            try {
+                for (var i = 0; i < window.frames.length; i++) {
+                    try {
+                        window.frames[i].print();
+                        return {nivel: 4, estrategia: 'frame.print()', exito: true};
+                    } catch(e) {}
+                }
+            } catch(e) {}
+
+            // Intentar parent.mainFrame.print()
+            try {
+                if (window.parent && window.parent.mainFrame) {
+                    window.parent.mainFrame.print();
+                    return {nivel: 4, estrategia: 'parent.mainFrame.print()', exito: true};
+                }
+            } catch(e) {}
+
+            return {nivel: 4, estrategia: 'Ninguna', exito: false};
+            """
+
+            resultado_nivel4 = self.driver.execute_script(js_window_print)
+
+            if resultado_nivel4 and resultado_nivel4.get('exito'):
+                self.log(f"  ✅ NIVEL 4 EXITOSO: {resultado_nivel4['estrategia']}")
+                time.sleep(2)
+                return True
+            else:
+                self.log(f"  ❌ NIVEL 4 FALLÓ")
+
+        except Exception as e:
+            self.log(f"  ❌ NIVEL 4 error: {str(e)[:100]}")
+
+        # Si todo falló
+        self.log("  ❌❌❌ MEGA NUCLEAR FALLÓ - 'Imprimir Constancia' no encontrado después de 4 niveles")
+        self.log("  ℹ️ NOTA: Si visualmente aparece el diálogo, el problema puede estar en el manejo de excepciones")
+        return False
 
     def clic_boton_imprimir_chrome(self):
         """
