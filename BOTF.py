@@ -3457,35 +3457,50 @@ class BotDenunciasSUNAT:
                 time.sleep(3)
 
             # ═══════════════════════════════════════════════════════════════
-            # PASO 4: PRESIONAR "IMPRIMIR CONSTANCIA"
+            # PASO 4: PRESIONAR "IMPRIMIR CONSTANCIA" - MODO PERSISTENTE
             # ═══════════════════════════════════════════════════════════════
-            self.log("\n🖨️ PASO 4: Presionando 'Imprimir Constancia'...")
+            self.log("\n🖨️ PASO 4: Presionando 'Imprimir Constancia' (MODO PERSISTENTE)...")
 
-            if not self.clic_imprimir_constancia_nuclear():
-                raise Exception("No se pudo hacer clic en 'Imprimir Constancia'")
+            if not self.ejecutar_con_reintentos_inteligentes(
+                self.clic_imprimir_constancia_nuclear,
+                "Imprimir Constancia",
+                max_intentos=3,
+                espera_entre_intentos=[2, 5, 10]
+            ):
+                raise Exception("No se pudo hacer clic en 'Imprimir Constancia' después de 3 intentos")
 
             time.sleep(3)
 
             # ═══════════════════════════════════════════════════════════════
-            # PASO 5: PRESIONAR BOTÓN "IMPRIMIR"
+            # PASO 5: PRESIONAR BOTÓN "IMPRIMIR" - MODO PERSISTENTE
             # ═══════════════════════════════════════════════════════════════
-            self.log("\n🖨️ PASO 5: Presionando botón 'Imprimir'...")
+            self.log("\n🖨️ PASO 5: Presionando botón 'Imprimir' (MODO PERSISTENTE)...")
 
-            if not self.clic_boton_imprimir_chrome():
-                raise Exception("No se pudo hacer clic en el botón Imprimir")
+            if not self.ejecutar_con_reintentos_inteligentes(
+                self.clic_boton_imprimir_chrome,
+                "Botón Imprimir",
+                max_intentos=3,
+                espera_entre_intentos=[2, 5, 10]
+            ):
+                raise Exception("No se pudo hacer clic en el botón Imprimir después de 3 intentos")
 
             time.sleep(2)
 
             # ═══════════════════════════════════════════════════════════════
-            # PASO 6: GUARDAR ARCHIVO PDF
+            # PASO 6: GUARDAR ARCHIVO PDF - MODO PERSISTENTE
             # ═══════════════════════════════════════════════════════════════
-            self.log("\n💾 PASO 6: Guardando archivo PDF...")
+            self.log("\n💾 PASO 6: Guardando archivo PDF (MODO PERSISTENTE)...")
 
             ruta_guardado = r"D:\DATA\Karencita\PROGRAMACIÓN\DENUNCIAS\DENUNCIAS MASIVAS"
             nombre_archivo = f"{numero_orden}.pdf"
 
-            if not self.guardar_pdf_chrome(ruta_guardado, nombre_archivo):
-                raise Exception("No se pudo guardar el archivo PDF")
+            if not self.ejecutar_guardado_con_reintentos(
+                ruta_guardado,
+                nombre_archivo,
+                max_intentos=3,
+                espera_entre_intentos=[3, 6, 10]
+            ):
+                raise Exception("No se pudo guardar el archivo PDF después de 3 intentos")
 
             self.log(f"\n{'='*70}")
             self.log(f"✅✅✅ DENUNCIA COMPLETADA Y GUARDADA ✅✅✅")
@@ -4328,7 +4343,120 @@ class BotDenunciasSUNAT:
     # ============================================
     # FUNCIONES AUXILIARES
     # ============================================
-    
+
+    def ejecutar_con_reintentos_inteligentes(self, funcion, descripcion, max_intentos=3, espera_entre_intentos=None):
+        """
+        🔄 EJECUTA UNA FUNCIÓN CON REINTENTOS INTELIGENTES
+
+        Características:
+        - Múltiples intentos con esperas progresivas
+        - Log detallado de cada intento
+        - Esperas diferentes entre intentos (2s, 5s, 10s)
+        - Si todos fallan, retorna False
+        """
+        if espera_entre_intentos is None:
+            espera_entre_intentos = [2, 5, 10]
+
+        self.log(f"\n🔄 MODO PERSISTENTE: {descripcion}")
+        self.log(f"   → Máximo {max_intentos} intentos con esperas progresivas")
+
+        for intento in range(1, max_intentos + 1):
+            try:
+                self.log(f"\n   🎯 INTENTO {intento}/{max_intentos} - {descripcion}")
+
+                # Ejecutar la función
+                resultado = funcion()
+
+                if resultado:
+                    self.log(f"   ✅ ¡ÉXITO en intento {intento}! - {descripcion}")
+                    return True
+                else:
+                    self.log(f"   ⚠️ Intento {intento} falló - {descripcion}")
+
+                    # Si no es el último intento, esperar antes de reintentar
+                    if intento < max_intentos:
+                        espera = espera_entre_intentos[intento - 1] if intento <= len(espera_entre_intentos) else espera_entre_intentos[-1]
+                        self.log(f"   ⏳ Esperando {espera}s antes del siguiente intento...")
+                        time.sleep(espera)
+
+            except Exception as e:
+                self.log(f"   ❌ Error en intento {intento}: {str(e)[:100]}")
+
+                # Si no es el último intento, esperar antes de reintentar
+                if intento < max_intentos:
+                    espera = espera_entre_intentos[intento - 1] if intento <= len(espera_entre_intentos) else espera_entre_intentos[-1]
+                    self.log(f"   ⏳ Esperando {espera}s antes del siguiente intento...")
+                    time.sleep(espera)
+
+        self.log(f"\n   ❌❌❌ FALLÓ después de {max_intentos} intentos - {descripcion}")
+        return False
+
+    def ejecutar_guardado_con_reintentos(self, ruta_guardado, nombre_archivo, max_intentos=3, espera_entre_intentos=None):
+        """
+        🔄 EJECUTA EL GUARDADO DE PDF CON REINTENTOS Y VERIFICACIÓN
+
+        Características:
+        - Múltiples intentos con esperas progresivas
+        - Verificación del archivo después de cada intento
+        - Búsqueda en Downloads si no se encuentra en la ruta
+        - Log detallado de cada intento
+        """
+        if espera_entre_intentos is None:
+            espera_entre_intentos = [3, 6, 10]
+
+        self.log(f"\n🔄 MODO PERSISTENTE: Guardando PDF")
+        self.log(f"   → Archivo: {nombre_archivo}")
+        self.log(f"   → Ruta: {ruta_guardado}")
+        self.log(f"   → Máximo {max_intentos} intentos")
+
+        ruta_completa = os.path.join(ruta_guardado, nombre_archivo)
+
+        for intento in range(1, max_intentos + 1):
+            try:
+                self.log(f"\n   🎯 INTENTO {intento}/{max_intentos} - Guardando PDF")
+
+                # Ejecutar la función de guardado
+                resultado = self.guardar_pdf_chrome(ruta_guardado, nombre_archivo)
+
+                # Verificar que el archivo realmente exista
+                if resultado and os.path.exists(ruta_completa):
+                    tamanio = os.path.getsize(ruta_completa)
+                    self.log(f"   ✅ ¡ÉXITO en intento {intento}! Archivo guardado ({tamanio} bytes)")
+                    return True
+                else:
+                    self.log(f"   ⚠️ Intento {intento} falló o archivo no encontrado")
+
+                    # Buscar en Downloads
+                    downloads_path = os.path.join(os.path.expanduser("~"), "Downloads")
+                    archivo_en_downloads = os.path.join(downloads_path, nombre_archivo)
+
+                    if os.path.exists(archivo_en_downloads):
+                        self.log(f"   ℹ️ Archivo encontrado en Downloads, moviéndolo...")
+                        import shutil
+                        shutil.move(archivo_en_downloads, ruta_completa)
+
+                        if os.path.exists(ruta_completa):
+                            self.log(f"   ✅ ¡ÉXITO! Archivo movido desde Downloads")
+                            return True
+
+                    # Si no es el último intento, esperar antes de reintentar
+                    if intento < max_intentos:
+                        espera = espera_entre_intentos[intento - 1] if intento <= len(espera_entre_intentos) else espera_entre_intentos[-1]
+                        self.log(f"   ⏳ Esperando {espera}s antes del siguiente intento...")
+                        time.sleep(espera)
+
+            except Exception as e:
+                self.log(f"   ❌ Error en intento {intento}: {str(e)[:100]}")
+
+                # Si no es el último intento, esperar antes de reintentar
+                if intento < max_intentos:
+                    espera = espera_entre_intentos[intento - 1] if intento <= len(espera_entre_intentos) else espera_entre_intentos[-1]
+                    self.log(f"   ⏳ Esperando {espera}s antes del siguiente intento...")
+                    time.sleep(espera)
+
+        self.log(f"\n   ❌❌❌ FALLÓ después de {max_intentos} intentos - Guardado de PDF")
+        return False
+
     def obtener_selector_submodalidad(self, valor_modalidad):
         mapeo = {
             "03000": "codigosubtrib1",
