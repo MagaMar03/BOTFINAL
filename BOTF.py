@@ -2733,6 +2733,7 @@ class BotDenunciasSUNAT:
             # ═══════════════════════════════════════════════════════════════
 
             # 1. Modalidad Evasión (Columna C = índice 2)
+            valor_modalidad_seleccionado = None  # Para determinar selector de submodalidad
             if len(datos) > 2 and pd.notna(datos.iloc[2]):
                 valor = str(datos.iloc[2]).strip()
                 if valor != "" and valor != "-":
@@ -2741,13 +2742,79 @@ class BotDenunciasSUNAT:
                         raise Exception(f"No se pudo seleccionar la Modalidad: '{valor}'")
                     time.sleep(2)
 
+                    # OBTENER EL VALOR DE MODALIDAD SELECCIONADO (03000, 04000, etc.)
+                    js_obtener_valor = """
+                    function obtenerValorModalidad(ventana) {
+                        try {
+                            var selects = ventana.document.getElementsByName('modalidad');
+                            if (selects.length > 0) {
+                                return selects[0].value;
+                            }
+                            for (var i = 0; i < ventana.frames.length; i++) {
+                                var resultado = obtenerValorModalidad(ventana.frames[i]);
+                                if (resultado) return resultado;
+                            }
+                        } catch(e) {}
+                        return null;
+                    }
+                    return obtenerValorModalidad(window.top);
+                    """
+                    try:
+                        valor_modalidad_seleccionado = self.driver.execute_script(js_obtener_valor)
+                        self.log(f"  → Valor de modalidad seleccionado: {valor_modalidad_seleccionado}")
+                    except Exception as e:
+                        self.log(f"  ⚠️ No se pudo obtener valor de modalidad: {str(e)[:50]}")
+
             # 2. Sub Modalidad (Columna D = índice 3) - OPCIONAL
+            # USAR EL SELECTOR CORRECTO: codigosubtrib1, codigosubtrib2, etc.
             if len(datos) > 3 and pd.notna(datos.iloc[3]):
                 valor_sub = str(datos.iloc[3]).strip()
                 if valor_sub != "" and valor_sub != "-":
                     self.log(f"\n📋 CAMPO 2: Sub Modalidad = '{valor_sub}'")
-                    # Intentar llenar, pero no fallar si no existe
-                    self.buscar_y_rellenar_con_javascript("submodalidad", valor_sub, "select")
+
+                    # Obtener el selector correcto según la modalidad
+                    nombre_selector_sub = self.obtener_selector_submodalidad(valor_modalidad_seleccionado)
+
+                    if nombre_selector_sub:
+                        self.log(f"  → Usando selector: '{nombre_selector_sub}'")
+
+                        # HACER VISIBLE EL TR QUE CONTIENE EL SELECT (está oculto por defecto)
+                        js_mostrar_tr = f"""
+                        function mostrarYRellenarSubmodalidad(ventana) {{
+                            try {{
+                                var selects = ventana.document.getElementsByName('{nombre_selector_sub}');
+                                if (selects.length > 0) {{
+                                    var select = selects[0];
+                                    // Buscar el TR padre y hacerlo visible
+                                    var tr = select.closest('tr');
+                                    if (tr) {{
+                                        tr.style.display = '';
+                                        tr.style.visibility = 'visible';
+                                    }}
+                                    return true;
+                                }}
+                                for (var i = 0; i < ventana.frames.length; i++) {{
+                                    if (mostrarYRellenarSubmodalidad(ventana.frames[i])) return true;
+                                }}
+                            }} catch(e) {{}}
+                            return false;
+                        }}
+                        return mostrarYRellenarSubmodalidad(window.top);
+                        """
+                        try:
+                            self.driver.execute_script(js_mostrar_tr)
+                            time.sleep(0.5)
+                        except:
+                            pass
+
+                        # Ahora rellenar el campo con el selector correcto
+                        if self.buscar_y_rellenar_con_javascript(nombre_selector_sub, valor_sub, "select"):
+                            self.log(f"  ✅ Sub Modalidad seleccionada correctamente")
+                        else:
+                            self.log(f"  ⚠️ No se pudo seleccionar Sub Modalidad")
+                    else:
+                        self.log(f"  ⚠️ No hay selector de submodalidad para modalidad: {valor_modalidad_seleccionado}")
+
                     time.sleep(1)
 
             # 3. Tipo de Denuncia (Columna E = índice 4 - Radio button)
