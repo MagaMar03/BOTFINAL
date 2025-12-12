@@ -1599,11 +1599,36 @@ class BotDenunciasSUNAT:
            - Expandir nivel3 "Denuncias" (id="nivel3_5_5_2_1")
            - Clic en nivel4 "Registro de Denuncias" (id="nivel4_5_5_2_10")
         4. El formulario se carga EN LA MISMA PESTAÑA al lado derecho (iframe)
+
+        OPTIMIZACIÓN: Si ya estamos en menuS03Alias, solo hacer clic en "Registro de Denuncias"
         """
         try:
             self.log("Navegando al formulario...")
 
             wait_largo = WebDriverWait(self.driver, 30)
+
+            # ═══════════════════════════════════════════════════════════════
+            # VERIFICAR SI YA ESTAMOS EN LA VENTANA CORRECTA (menuS03Alias)
+            # ═══════════════════════════════════════════════════════════════
+            url_actual = self.driver.current_url
+            self.log(f"  → URL actual: {url_actual[:80]}...")
+
+            if "menuS03Alias" in url_actual:
+                self.log("  ✅ Ya estamos en ventana menuS03Alias - saltando navegación")
+                self.log("  → Solo hacer clic en 'Registro de Denuncias'...")
+
+                # Intentar hacer clic directo en "Registro de Denuncias"
+                if self.volver_a_registro_denuncias():
+                    time.sleep(3)
+                    return True
+                else:
+                    # Si falló, continuar con el flujo normal de expansión del menú
+                    self.log("  ⚠️ Clic directo falló, expandiendo menú...")
+
+            # ═══════════════════════════════════════════════════════════════
+            # FLUJO COMPLETO: Navegar desde la ventana principal
+            # ═══════════════════════════════════════════════════════════════
+
             ventana_original = self.driver.current_window_handle
             ventanas_iniciales = len(self.driver.window_handles)
 
@@ -2766,7 +2791,7 @@ class BotDenunciasSUNAT:
                         self.log(f"  ⚠️ No se pudo obtener valor de modalidad: {str(e)[:50]}")
 
             # 2. Sub Modalidad (Columna D = índice 3) - OPCIONAL
-            # USAR EL SELECTOR CORRECTO: codigosubtrib1, codigosubtrib2, etc.
+            # 🚨🚨🚨 MODO NUCLEAR COMPLETO - MISMO PATRÓN QUE LOS DEMÁS CAMPOS 🚨🚨🚨
             if len(datos) > 3 and pd.notna(datos.iloc[3]):
                 valor_sub = str(datos.iloc[3]).strip()
                 if valor_sub != "" and valor_sub != "-":
@@ -2778,40 +2803,143 @@ class BotDenunciasSUNAT:
                     if nombre_selector_sub:
                         self.log(f"  → Usando selector: '{nombre_selector_sub}'")
 
-                        # HACER VISIBLE EL TR QUE CONTIENE EL SELECT (está oculto por defecto)
-                        js_mostrar_tr = f"""
-                        function mostrarYRellenarSubmodalidad(ventana) {{
-                            try {{
-                                var selects = ventana.document.getElementsByName('{nombre_selector_sub}');
-                                if (selects.length > 0) {{
-                                    var select = selects[0];
-                                    // Buscar el TR padre y hacerlo visible
-                                    var tr = select.closest('tr');
-                                    if (tr) {{
-                                        tr.style.display = '';
-                                        tr.style.visibility = 'visible';
-                                    }}
-                                    return true;
-                                }}
-                                for (var i = 0; i < ventana.frames.length; i++) {{
-                                    if (mostrarYRellenarSubmodalidad(ventana.frames[i])) return true;
-                                }}
-                            }} catch(e) {{}}
-                            return false;
-                        }}
-                        return mostrarYRellenarSubmodalidad(window.top);
-                        """
-                        try:
-                            self.driver.execute_script(js_mostrar_tr)
-                            time.sleep(0.5)
-                        except:
-                            pass
+                        # 🚨 MÉTODO NUCLEAR COMPLETO - JavaScript recursivo con todas las estrategias
+                        js_submodalidad_nuclear = f"""
+                        (function() {{
+                            function buscarYRellenarSubmodalidad(ventana, nivel) {{
+                                if (nivel > 10) return false;
 
-                        # Ahora rellenar el campo con el selector correcto
-                        if self.buscar_y_rellenar_con_javascript(nombre_selector_sub, valor_sub, "select"):
-                            self.log(f"  ✅ Sub Modalidad seleccionada correctamente")
-                        else:
-                            self.log(f"  ⚠️ No se pudo seleccionar Sub Modalidad")
+                                try {{
+                                    // Buscar el select por nombre
+                                    var selects = ventana.document.getElementsByName('{nombre_selector_sub}');
+
+                                    if (selects.length > 0) {{
+                                        var select = selects[0];
+
+                                        // PASO 1: Hacer visible el TR padre (está oculto por defecto)
+                                        var tr = select.closest('tr');
+                                        if (tr) {{
+                                            tr.style.display = '';
+                                            tr.style.visibility = 'visible';
+                                            tr.removeAttribute('hidden');
+                                        }}
+
+                                        // PASO 2: Hacer visible el select
+                                        select.style.display = '';
+                                        select.style.visibility = 'visible';
+                                        select.disabled = false;
+
+                                        // PASO 3: Buscar la mejor opción con múltiples estrategias
+                                        var opciones = select.options;
+                                        var valorBuscado = '{valor_sub}'.toUpperCase().trim();
+                                        var mejorIndice = -1;
+
+                                        // Estrategia 1: Coincidencia EXACTA
+                                        for (var i = 0; i < opciones.length; i++) {{
+                                            var textoOpcion = (opciones[i].text || '').toUpperCase().trim();
+                                            if (textoOpcion === valorBuscado) {{
+                                                mejorIndice = i;
+                                                break;
+                                            }}
+                                        }}
+
+                                        // Estrategia 2: La opción COMIENZA con el valor
+                                        if (mejorIndice === -1) {{
+                                            for (var i = 0; i < opciones.length; i++) {{
+                                                var textoOpcion = (opciones[i].text || '').toUpperCase().trim();
+                                                if (textoOpcion.indexOf(valorBuscado) === 0) {{
+                                                    mejorIndice = i;
+                                                    break;
+                                                }}
+                                            }}
+                                        }}
+
+                                        // Estrategia 3: El valor COMIENZA con la opción
+                                        if (mejorIndice === -1) {{
+                                            for (var i = 0; i < opciones.length; i++) {{
+                                                var textoOpcion = (opciones[i].text || '').toUpperCase().trim();
+                                                if (valorBuscado.indexOf(textoOpcion) === 0 && textoOpcion.length > 3) {{
+                                                    mejorIndice = i;
+                                                    break;
+                                                }}
+                                            }}
+                                        }}
+
+                                        // Estrategia 4: CONTIENE el valor
+                                        if (mejorIndice === -1) {{
+                                            for (var i = 0; i < opciones.length; i++) {{
+                                                var textoOpcion = (opciones[i].text || '').toUpperCase().trim();
+                                                if (textoOpcion.indexOf(valorBuscado) !== -1) {{
+                                                    mejorIndice = i;
+                                                    break;
+                                                }}
+                                            }}
+                                        }}
+
+                                        // Estrategia 5: El valor CONTIENE la opción
+                                        if (mejorIndice === -1) {{
+                                            for (var i = 0; i < opciones.length; i++) {{
+                                                var textoOpcion = (opciones[i].text || '').toUpperCase().trim();
+                                                if (valorBuscado.indexOf(textoOpcion) !== -1 && textoOpcion.length > 3) {{
+                                                    mejorIndice = i;
+                                                    break;
+                                                }}
+                                            }}
+                                        }}
+
+                                        if (mejorIndice !== -1) {{
+                                            // PASO 4: Dar foco y seleccionar
+                                            try {{ select.focus(); }} catch(e) {{}}
+
+                                            select.selectedIndex = mejorIndice;
+                                            select.value = opciones[mejorIndice].value;
+
+                                            // PASO 5: Disparar TODOS los eventos
+                                            try {{
+                                                select.dispatchEvent(new Event('input', {{bubbles: true}}));
+                                                select.dispatchEvent(new Event('change', {{bubbles: true}}));
+                                                select.dispatchEvent(new Event('blur', {{bubbles: true}}));
+                                            }} catch(e) {{}}
+
+                                            // Eventos legacy
+                                            try {{
+                                                if (select.onchange) select.onchange();
+                                                if (select.oninput) select.oninput();
+                                            }} catch(e) {{}}
+
+                                            return true;
+                                        }}
+                                    }}
+
+                                    // Buscar en frames hijos
+                                    for (var i = 0; i < ventana.frames.length; i++) {{
+                                        try {{
+                                            if (buscarYRellenarSubmodalidad(ventana.frames[i], nivel + 1)) {{
+                                                return true;
+                                            }}
+                                        }} catch(e) {{}}
+                                    }}
+                                }} catch(e) {{}}
+                                return false;
+                            }}
+
+                            return buscarYRellenarSubmodalidad(window.top, 0);
+                        }})();
+                        """
+
+                        try:
+                            resultado = self.driver.execute_script(js_submodalidad_nuclear)
+                            if resultado:
+                                self.log(f"  ✅ Sub Modalidad seleccionada correctamente (NUCLEAR)")
+                            else:
+                                # Fallback: usar método estándar
+                                self.log(f"  ⚠️ Método nuclear falló, intentando método estándar...")
+                                if self.buscar_y_rellenar_con_javascript(nombre_selector_sub, valor_sub, "select"):
+                                    self.log(f"  ✅ Sub Modalidad seleccionada (fallback)")
+                                else:
+                                    self.log(f"  ⚠️ No se pudo seleccionar Sub Modalidad")
+                        except Exception as e:
+                            self.log(f"  ⚠️ Error en Sub Modalidad: {str(e)[:50]}")
                     else:
                         self.log(f"  ⚠️ No hay selector de submodalidad para modalidad: {valor_modalidad_seleccionado}")
 
@@ -3678,176 +3806,233 @@ class BotDenunciasSUNAT:
 
         ESTRATEGIA: Probar TODOS los métodos hasta que uno funcione
         """
-        self.log("  🚨🚨🚨 MODO PERSISTENTE: Imprimir Constancia 🚨🚨🚨")
-        self.log("  → Máximo 3 intentos con esperas progresivas")
+        self.log("  🚨🚨🚨 MODO NUCLEAR TOTAL: Imprimir Constancia 🚨🚨🚨")
+        self.log("  → Máximo 3 intentos con 5 niveles cada uno")
 
         for intento in range(1, 4):
             self.log(f"\n  🔄 INTENTO {intento}/3 - Imprimir Constancia")
 
             # ═══════════════════════════════════════════════════════════════
-            # MÉTODO 1: JavaScript - Ejecutar printPage directamente
+            # NIVEL 1: JavaScript NUCLEAR - Buscar y ejecutar en TODOS los frames
             # ═══════════════════════════════════════════════════════════════
-            self.log("  🔥 NIVEL 1: JavaScript rápido y directo...")
+            self.log("  🔥 NIVEL 1: JavaScript NUCLEAR recursivo...")
 
             try:
-                # Intentar ejecutar printPage en todos los contextos
-                js_directo = """
+                js_nuclear = """
                 (function() {
-                    // Buscar en window.top y todos sus frames
-                    function buscarYEjecutar(win, nivel) {
-                        if (nivel > 10) return false;
-                        try {
-                            // Intentar ejecutar printPage si existe
-                            if (typeof win.printPage === 'function') {
-                                win.printPage(win.parent.mainFrame || win);
-                                return true;
-                            }
-
-                            // Buscar el enlace con onclick printPage
+                    var intentos = [
+                        // Método 1: Buscar enlace con onclick printPage
+                        function(win) {
                             var enlaces = win.document.querySelectorAll('a[onclick*="printPage"]');
-                            if (enlaces.length > 0) {
-                                enlaces[0].click();
-                                return true;
-                            }
-
-                            // Buscar por clase lnk10
-                            enlaces = win.document.querySelectorAll('a.lnk10');
+                            if (enlaces.length > 0) { enlaces[0].click(); return true; }
+                            return false;
+                        },
+                        // Método 2: Buscar por clase lnk10 con texto Imprimir
+                        function(win) {
+                            var enlaces = win.document.querySelectorAll('a.lnk10');
                             for (var i = 0; i < enlaces.length; i++) {
-                                var txt = (enlaces[i].innerText || '').toLowerCase();
-                                if (txt.indexOf('imprimir') !== -1) {
-                                    enlaces[i].click();
-                                    return true;
-                                }
+                                var txt = (enlaces[i].innerText || enlaces[i].textContent || '').toLowerCase();
+                                if (txt.indexOf('imprimir') !== -1) { enlaces[i].click(); return true; }
                             }
-
-                            // Buscar imagen de impresora
+                            return false;
+                        },
+                        // Método 3: Buscar imagen de impresora y clickear padre
+                        function(win) {
                             var imgs = win.document.querySelectorAll('img[src*="impresora"]');
                             for (var i = 0; i < imgs.length; i++) {
                                 var padre = imgs[i].parentElement;
-                                if (padre && padre.tagName === 'A') {
-                                    padre.click();
-                                    return true;
-                                }
+                                if (padre && padre.tagName === 'A') { padre.click(); return true; }
                             }
+                            return false;
+                        },
+                        // Método 4: Buscar cualquier enlace con Imprimir Constancia
+                        function(win) {
+                            var enlaces = win.document.querySelectorAll('a');
+                            for (var i = 0; i < enlaces.length; i++) {
+                                var txt = (enlaces[i].innerText || enlaces[i].textContent || '').toLowerCase();
+                                if (txt.indexOf('imprimir constancia') !== -1) { enlaces[i].click(); return true; }
+                            }
+                            return false;
+                        },
+                        // Método 5: Ejecutar función printPage si existe
+                        function(win) {
+                            if (typeof win.printPage === 'function') {
+                                try { win.printPage(win.parent.mainFrame || win); return true; } catch(e) {}
+                            }
+                            return false;
+                        },
+                        // Método 6: Buscar href="#" con onclick que contenga print
+                        function(win) {
+                            var enlaces = win.document.querySelectorAll('a[href="#"][onclick*="print"]');
+                            if (enlaces.length > 0) { enlaces[0].click(); return true; }
+                            return false;
+                        }
+                    ];
 
+                    function buscarEnFrames(win, nivel) {
+                        if (nivel > 10) return false;
+                        try {
+                            // Probar todos los métodos en la ventana actual
+                            for (var m = 0; m < intentos.length; m++) {
+                                try { if (intentos[m](win)) return true; } catch(e) {}
+                            }
                             // Buscar en frames hijos
                             for (var i = 0; i < win.frames.length; i++) {
-                                try {
-                                    if (buscarYEjecutar(win.frames[i], nivel + 1)) return true;
-                                } catch(e) {}
+                                try { if (buscarEnFrames(win.frames[i], nivel + 1)) return true; } catch(e) {}
                             }
                         } catch(e) {}
                         return false;
                     }
-                    return buscarYEjecutar(window.top, 0);
+                    return buscarEnFrames(window.top, 0);
                 })();
                 """
-
-                resultado = self.driver.execute_script(js_directo)
+                resultado = self.driver.execute_script(js_nuclear)
                 if resultado:
-                    self.log("  ✅ NIVEL 1 EXITOSO: JavaScript encontró y clickeó el enlace")
+                    self.log("  ✅ NIVEL 1 EXITOSO: JavaScript NUCLEAR encontró y clickeó")
                     time.sleep(2)
                     return True
                 else:
-                    self.log("  ⚠️ Nivel 1 falló, continuando al Nivel 2...")
-
+                    self.log("  ⚠️ Nivel 1 falló, continuando...")
             except Exception as e:
                 self.log(f"  ⚠️ Nivel 1 error: {str(e)[:50]}")
 
             # ═══════════════════════════════════════════════════════════════
-            # MÉTODO 2: Selenium - Buscar en iframe y hacer clic
+            # NIVEL 2: Selenium - Buscar en TODOS los iframes recursivamente
             # ═══════════════════════════════════════════════════════════════
-            self.log("  🎯 NIVEL 2: Selenium - Búsqueda en iframes...")
+            self.log("  🎯 NIVEL 2: Selenium - Búsqueda exhaustiva en iframes...")
 
             try:
-                # Guardar ventana actual
-                ventana_actual = self.driver.current_window_handle
-
-                # Volver al contexto principal
                 self.driver.switch_to.default_content()
-
-                # Lista de selectores a probar
                 selectores = [
                     (By.XPATH, "//a[contains(@onclick,'printPage')]"),
                     (By.XPATH, "//a[@class='lnk10'][contains(.,'Imprimir')]"),
                     (By.XPATH, "//img[contains(@src,'impresora')]/parent::a"),
                     (By.PARTIAL_LINK_TEXT, "Imprimir"),
                     (By.XPATH, "//a[contains(.,'Imprimir Constancia')]"),
+                    (By.XPATH, "//a[contains(@href,'#')][contains(@onclick,'print')]"),
+                    (By.CSS_SELECTOR, "a.lnk10"),
                 ]
 
-                # Buscar en contexto principal
-                for by, selector in selectores:
-                    try:
-                        elemento = self.driver.find_element(by, selector)
-                        if elemento.is_displayed():
-                            self.driver.execute_script("arguments[0].click();", elemento)
-                            self.log(f"  ✅ NIVEL 2 EXITOSO: Encontrado en contexto principal")
-                            time.sleep(2)
-                            return True
-                    except:
-                        pass
-
-                # Buscar en iframes
-                iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
-                for idx, iframe in enumerate(iframes):
-                    try:
-                        self.driver.switch_to.default_content()
-                        self.driver.switch_to.frame(iframe)
-
-                        # Buscar frames internos
-                        frames_internos = self.driver.find_elements(By.TAG_NAME, "frame")
-                        contextos = [None] + frames_internos  # None = contexto actual del iframe
-
-                        for frame in contextos:
-                            if frame is not None:
+                def buscar_en_contexto():
+                    for by, selector in selectores:
+                        try:
+                            elementos = self.driver.find_elements(by, selector)
+                            for elem in elementos:
                                 try:
-                                    self.driver.switch_to.frame(frame)
-                                except:
-                                    continue
-
-                            for by, selector in selectores:
-                                try:
-                                    elemento = self.driver.find_element(by, selector)
-                                    if elemento.is_displayed() or elemento.is_enabled():
-                                        self.driver.execute_script("arguments[0].click();", elemento)
-                                        self.log(f"  ✅ NIVEL 2 EXITOSO: Encontrado en iframe")
-                                        time.sleep(2)
+                                    if elem.is_displayed() or elem.is_enabled():
+                                        self.driver.execute_script("arguments[0].scrollIntoView(true);", elem)
+                                        time.sleep(0.3)
+                                        self.driver.execute_script("arguments[0].click();", elem)
                                         return True
                                 except:
                                     pass
+                        except:
+                            pass
+                    return False
 
-                            if frame is not None:
+                # Buscar en contexto principal
+                if buscar_en_contexto():
+                    self.log("  ✅ NIVEL 2 EXITOSO: Encontrado en contexto principal")
+                    time.sleep(2)
+                    return True
+
+                # Buscar en todos los iframes
+                iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+                for iframe in iframes:
+                    try:
+                        self.driver.switch_to.default_content()
+                        self.driver.switch_to.frame(iframe)
+                        if buscar_en_contexto():
+                            self.log("  ✅ NIVEL 2 EXITOSO: Encontrado en iframe")
+                            time.sleep(2)
+                            return True
+
+                        # Buscar frames internos
+                        frames = self.driver.find_elements(By.TAG_NAME, "frame")
+                        for frame in frames:
+                            try:
+                                self.driver.switch_to.frame(frame)
+                                if buscar_en_contexto():
+                                    self.log("  ✅ NIVEL 2 EXITOSO: Encontrado en frame interno")
+                                    time.sleep(2)
+                                    return True
                                 self.driver.switch_to.parent_frame()
-
-                    except Exception as e:
+                            except:
+                                pass
+                    except:
                         pass
 
                 self.driver.switch_to.default_content()
-                self.log("  ⚠️ Nivel 2 falló, continuando al Nivel 3...")
-
+                self.log("  ⚠️ Nivel 2 falló, continuando...")
             except Exception as e:
                 self.log(f"  ⚠️ Nivel 2 error: {str(e)[:50]}")
-                self.driver.switch_to.default_content()
+                try:
+                    self.driver.switch_to.default_content()
+                except:
+                    pass
 
             # ═══════════════════════════════════════════════════════════════
-            # MÉTODO 3: pyautogui - Ctrl+P directo (abre diálogo de impresión)
+            # NIVEL 3: pyautogui - Buscar y hacer clic en texto "Imprimir"
             # ═══════════════════════════════════════════════════════════════
-            self.log("  ⌨️ NIVEL 3: pyautogui - Ctrl+P directo...")
+            self.log("  🖱️ NIVEL 3: pyautogui - Buscar texto en pantalla...")
 
             try:
                 import pyautogui
-
-                # Asegurar que la ventana del navegador está enfocada
                 time.sleep(1)
 
-                # Ctrl+P abre el diálogo de impresión directamente
-                pyautogui.hotkey('ctrl', 'p')
-                self.log("  ✅ NIVEL 3 EXITOSO: Ctrl+P ejecutado")
-                time.sleep(3)
-                return True
+                # Intentar localizar el texto "Imprimir Constancia" en pantalla
+                try:
+                    ubicacion = pyautogui.locateOnScreen('imprimir_constancia.png', confidence=0.7)
+                    if ubicacion:
+                        centro = pyautogui.center(ubicacion)
+                        pyautogui.click(centro)
+                        self.log("  ✅ NIVEL 3 EXITOSO: Imagen encontrada y clickeada")
+                        time.sleep(2)
+                        return True
+                except:
+                    pass
 
+                self.log("  ⚠️ Nivel 3 falló, continuando...")
             except Exception as e:
                 self.log(f"  ⚠️ Nivel 3 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 4: pyautogui - Ctrl+P directo
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  ⌨️ NIVEL 4: pyautogui - Ctrl+P directo...")
+
+            try:
+                import pyautogui
+                time.sleep(1)
+                pyautogui.hotkey('ctrl', 'p')
+                self.log("  ✅ NIVEL 4 EXITOSO: Ctrl+P ejecutado")
+                time.sleep(3)
+                return True
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 4 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 5: ActionChains - Buscar y hacer clic
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🎮 NIVEL 5: ActionChains con movimiento...")
+
+            try:
+                from selenium.webdriver.common.action_chains import ActionChains
+                self.driver.switch_to.default_content()
+
+                # Buscar el elemento
+                for by, selector in selectores:
+                    try:
+                        elem = self.driver.find_element(by, selector)
+                        actions = ActionChains(self.driver)
+                        actions.move_to_element(elem).pause(0.5).click().perform()
+                        self.log("  ✅ NIVEL 5 EXITOSO: ActionChains clickeó el elemento")
+                        time.sleep(2)
+                        return True
+                    except:
+                        pass
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 5 error: {str(e)[:50]}")
 
             # Esperar antes del siguiente intento
             if intento < 3:
@@ -3866,98 +4051,168 @@ class BotDenunciasSUNAT:
         <cr-button class="action-button" role="button">Imprimir</cr-button>
 
         IMPORTANTE: El diálogo de impresión es NATIVO del navegador.
-        La forma más confiable es usar pyautogui con Enter.
+        Múltiples métodos para garantizar el éxito.
         """
-        self.log("  🚨🚨🚨 MODO PERSISTENTE: Botón Imprimir 🚨🚨🚨")
-        self.log("  → Máximo 3 intentos con esperas progresivas")
+        self.log("  🚨🚨🚨 MODO NUCLEAR TOTAL: Botón Imprimir 🚨🚨🚨")
+        self.log("  → Máximo 3 intentos con 6 niveles cada uno")
 
         for intento in range(1, 4):
             self.log(f"\n  🔄 INTENTO {intento}/3 - Botón Imprimir")
 
             # ═══════════════════════════════════════════════════════════════
-            # MÉTODO 1: pyautogui - Enter directo (más confiable)
+            # NIVEL 1: pyautogui - Enter directo (más confiable)
             # ═══════════════════════════════════════════════════════════════
             self.log("  🔥 NIVEL 1: pyautogui - Enter directo...")
 
             try:
                 import pyautogui
-
-                # Esperar a que el diálogo cargue completamente
                 time.sleep(2)
-
-                # En Edge/Chrome, el botón "Imprimir" suele estar enfocado por defecto
-                # Solo presionar Enter debería funcionar
                 pyautogui.press('enter')
                 self.log("  ✅ NIVEL 1 EXITOSO: Enter presionado")
                 time.sleep(2)
                 return True
-
             except Exception as e:
                 self.log(f"  ⚠️ Nivel 1 error: {str(e)[:50]}")
 
             # ═══════════════════════════════════════════════════════════════
-            # MÉTODO 2: pyautogui - Tab + Enter
+            # NIVEL 2: pyautogui - Alt+I (atajo en español para Imprimir)
             # ═══════════════════════════════════════════════════════════════
-            self.log("  🎯 NIVEL 2: pyautogui - Tab + Enter...")
+            self.log("  🎯 NIVEL 2: pyautogui - Alt+I...")
 
             try:
                 import pyautogui
-
                 time.sleep(1)
-
-                # Navegar con Tab para asegurar que llegamos al botón
-                for i in range(5):
-                    pyautogui.press('tab')
-                    time.sleep(0.15)
-
-                pyautogui.press('enter')
-                self.log("  ✅ NIVEL 2 EXITOSO: Tab + Enter ejecutado")
+                pyautogui.hotkey('alt', 'i')
+                self.log("  ✅ NIVEL 2 EXITOSO: Alt+I ejecutado")
                 time.sleep(2)
                 return True
-
             except Exception as e:
                 self.log(f"  ⚠️ Nivel 2 error: {str(e)[:50]}")
 
             # ═══════════════════════════════════════════════════════════════
-            # MÉTODO 3: JavaScript en Shadow DOM
+            # NIVEL 3: pyautogui - Tab múltiple + Enter
             # ═══════════════════════════════════════════════════════════════
-            self.log("  ⌨️ NIVEL 3: JavaScript en Shadow DOM...")
+            self.log("  ⌨️ NIVEL 3: pyautogui - Tab múltiple + Enter...")
+
+            try:
+                import pyautogui
+                time.sleep(1)
+                for i in range(8):
+                    pyautogui.press('tab')
+                    time.sleep(0.1)
+                pyautogui.press('enter')
+                self.log("  ✅ NIVEL 3 EXITOSO: Tab + Enter ejecutado")
+                time.sleep(2)
+                return True
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 3 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 4: JavaScript en Shadow DOM (estructura Chrome/Edge)
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🔧 NIVEL 4: JavaScript en Shadow DOM...")
 
             try:
                 js_shadow = """
                 (function() {
                     try {
+                        // Método 1: Estructura estándar
                         var printPreview = document.querySelector('print-preview-app');
-                        if (!printPreview || !printPreview.shadowRoot) return false;
-
-                        var sidebar = printPreview.shadowRoot.querySelector('print-preview-sidebar');
-                        if (!sidebar || !sidebar.shadowRoot) return false;
-
-                        var buttonStrip = sidebar.shadowRoot.querySelector('print-preview-button-strip');
-                        if (!buttonStrip || !buttonStrip.shadowRoot) return false;
-
-                        var boton = buttonStrip.shadowRoot.querySelector('cr-button.action-button');
-                        if (boton) {
-                            boton.click();
-                            return true;
+                        if (printPreview && printPreview.shadowRoot) {
+                            var sidebar = printPreview.shadowRoot.querySelector('print-preview-sidebar');
+                            if (sidebar && sidebar.shadowRoot) {
+                                var buttonStrip = sidebar.shadowRoot.querySelector('print-preview-button-strip');
+                                if (buttonStrip && buttonStrip.shadowRoot) {
+                                    var boton = buttonStrip.shadowRoot.querySelector('cr-button.action-button');
+                                    if (boton) { boton.click(); return true; }
+                                }
+                            }
                         }
-                        return false;
-                    } catch(e) {
-                        return false;
-                    }
+
+                        // Método 2: Buscar directamente cr-button.action-button
+                        var botones = document.querySelectorAll('cr-button.action-button');
+                        for (var i = 0; i < botones.length; i++) {
+                            if (botones[i].innerText.indexOf('Imprimir') !== -1 ||
+                                botones[i].innerText.indexOf('Print') !== -1) {
+                                botones[i].click();
+                                return true;
+                            }
+                        }
+
+                        // Método 3: Buscar en todos los shadow roots
+                        function buscarEnShadow(root) {
+                            var botones = root.querySelectorAll('cr-button, button');
+                            for (var i = 0; i < botones.length; i++) {
+                                var texto = (botones[i].innerText || '').toLowerCase();
+                                if (texto.indexOf('imprimir') !== -1 || texto.indexOf('print') !== -1) {
+                                    if (botones[i].className.indexOf('action') !== -1 ||
+                                        botones[i].className.indexOf('primary') !== -1) {
+                                        botones[i].click();
+                                        return true;
+                                    }
+                                }
+                            }
+                            var elementos = root.querySelectorAll('*');
+                            for (var i = 0; i < elementos.length; i++) {
+                                if (elementos[i].shadowRoot) {
+                                    if (buscarEnShadow(elementos[i].shadowRoot)) return true;
+                                }
+                            }
+                            return false;
+                        }
+                        return buscarEnShadow(document);
+                    } catch(e) { return false; }
                 })();
                 """
-
                 resultado = self.driver.execute_script(js_shadow)
                 if resultado:
-                    self.log("  ✅ NIVEL 3 EXITOSO: JavaScript clickeó el botón")
+                    self.log("  ✅ NIVEL 4 EXITOSO: JavaScript clickeó el botón")
                     time.sleep(2)
                     return True
                 else:
-                    self.log("  ⚠️ Nivel 3: No se encontró el botón en Shadow DOM")
-
+                    self.log("  ⚠️ Nivel 4: No se encontró el botón")
             except Exception as e:
-                self.log(f"  ⚠️ Nivel 3 error: {str(e)[:50]}")
+                self.log(f"  ⚠️ Nivel 4 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 5: pyautogui - Shift+Tab + Enter (navegación inversa)
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🔄 NIVEL 5: pyautogui - Shift+Tab + Enter...")
+
+            try:
+                import pyautogui
+                time.sleep(1)
+                for i in range(3):
+                    pyautogui.hotkey('shift', 'tab')
+                    time.sleep(0.1)
+                pyautogui.press('enter')
+                self.log("  ✅ NIVEL 5 EXITOSO: Shift+Tab + Enter ejecutado")
+                time.sleep(2)
+                return True
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 5 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 6: pyautogui - Escape + Ctrl+P + Enter (reiniciar)
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🔁 NIVEL 6: Reiniciar diálogo y Enter...")
+
+            try:
+                import pyautogui
+                time.sleep(1)
+                # Cerrar diálogo actual
+                pyautogui.press('escape')
+                time.sleep(1)
+                # Reabrir con Ctrl+P
+                pyautogui.hotkey('ctrl', 'p')
+                time.sleep(3)
+                # Enter directo
+                pyautogui.press('enter')
+                self.log("  ✅ NIVEL 6 EXITOSO: Diálogo reiniciado y Enter")
+                time.sleep(2)
+                return True
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 6 error: {str(e)[:50]}")
 
             # Esperar antes del siguiente intento
             if intento < 3:
@@ -4498,15 +4753,112 @@ class BotDenunciasSUNAT:
     # PROCESO PRINCIPAL
     # ============================================
     
+    def volver_a_registro_denuncias(self):
+        """
+        🔄 Volver a hacer clic en "Registro de Denuncias" en el menú lateral
+
+        Esta función se usa después de completar una denuncia para empezar otra.
+        NO cierra ni abre nuevas ventanas - solo hace clic en el menú.
+        """
+        self.log("\n🔄 Volviendo a 'Registro de Denuncias' para siguiente denuncia...")
+
+        try:
+            # Volver al contexto principal
+            self.driver.switch_to.default_content()
+            time.sleep(1)
+
+            # Intentar hacer clic en "Registro de Denuncias" con múltiples estrategias
+            for intento in range(1, 4):
+                self.log(f"  → Intento {intento}/3 para clic en 'Registro de Denuncias'...")
+
+                # Estrategia 1: JavaScript NUCLEAR - buscar en todos los frames
+                try:
+                    js_clic = """
+                    (function() {
+                        function buscarYClicRegistro(win, nivel) {
+                            if (nivel > 10) return false;
+                            try {
+                                // Buscar por ID exacto
+                                var elem = win.document.getElementById('nivel4_5_5_2_10');
+                                if (elem) { elem.click(); return true; }
+
+                                // Buscar por texto en elementos nivel4
+                                var nivel4s = win.document.querySelectorAll('li.nivel4, [class*="nivel4"]');
+                                for (var i = 0; i < nivel4s.length; i++) {
+                                    var texto = (nivel4s[i].innerText || nivel4s[i].textContent || '').trim();
+                                    if (texto.indexOf('Registro de Denuncias') !== -1) {
+                                        nivel4s[i].click();
+                                        return true;
+                                    }
+                                }
+
+                                // Buscar cualquier elemento con ese texto
+                                var todos = win.document.querySelectorAll('span, a, li');
+                                for (var i = 0; i < todos.length; i++) {
+                                    var texto = (todos[i].innerText || todos[i].textContent || '').trim();
+                                    if (texto === 'Registro de Denuncias' || texto.indexOf('Registro de Denuncias') === 0) {
+                                        todos[i].click();
+                                        return true;
+                                    }
+                                }
+
+                                // Buscar en frames hijos
+                                for (var i = 0; i < win.frames.length; i++) {
+                                    try { if (buscarYClicRegistro(win.frames[i], nivel + 1)) return true; } catch(e) {}
+                                }
+                            } catch(e) {}
+                            return false;
+                        }
+                        return buscarYClicRegistro(window.top, 0);
+                    })();
+                    """
+                    resultado = self.driver.execute_script(js_clic)
+                    if resultado:
+                        self.log("  ✅ Clic en 'Registro de Denuncias' exitoso (JavaScript)")
+                        time.sleep(3)
+                        return True
+                except:
+                    pass
+
+                # Estrategia 2: Selenium - buscar por ID
+                try:
+                    elemento = self.driver.find_element(By.ID, "nivel4_5_5_2_10")
+                    self.driver.execute_script("arguments[0].click();", elemento)
+                    self.log("  ✅ Clic en 'Registro de Denuncias' exitoso (Selenium ID)")
+                    time.sleep(3)
+                    return True
+                except:
+                    pass
+
+                # Estrategia 3: Selenium - buscar por XPATH
+                try:
+                    elemento = self.driver.find_element(By.XPATH,
+                        "//li[contains(@class,'nivel4')]//span[contains(text(),'Registro de Denuncias')]")
+                    self.driver.execute_script("arguments[0].click();", elemento)
+                    self.log("  ✅ Clic en 'Registro de Denuncias' exitoso (Selenium XPATH)")
+                    time.sleep(3)
+                    return True
+                except:
+                    pass
+
+                time.sleep(2)
+
+            self.log("  ⚠️ No se pudo volver a 'Registro de Denuncias' - continuando...")
+            return False
+
+        except Exception as e:
+            self.log(f"  ⚠️ Error al volver a Registro: {str(e)[:50]}")
+            return False
+
     def procesar_una_denuncia(self, datos_fila, numero_fila):
         try:
             if not self.interfaz.proceso_activo:
                 return False
-            
+
             self.log(f"\n{'='*50}")
             self.log(f"📋 PROCESANDO DENUNCIA #{numero_fila}")
             self.log(f"{'='*50}")
-            
+
             # Navegar al formulario
             if not self.navegar_a_formulario_registro():
                 self.log("❌ Fallo en navegación al formulario")
@@ -4526,42 +4878,50 @@ class BotDenunciasSUNAT:
                 self.log("❌ Fallo en Sección 1 - Identificación")
                 self.denuncias_fallidas += 1
                 return False
-            
+
             if not self.interfaz.proceso_activo:
                 return False
-            
+
             # Sección 2
             if not self.llenar_seccion2_atencion_denuncias(datos_fila):
                 return False
-            
+
             if not self.interfaz.proceso_activo:
                 return False
-            
-            # Sección 3
+
+            # Sección 3 (incluye guardar PDF)
             if not self.llenar_seccion3_identificacion_denunciante(datos_fila):
                 return False
-            
-            self.log(f"🎉 ¡DENUNCIA #{numero_fila} REGISTRADA EXITOSAMENTE!")
+
+            self.log(f"🎉 ¡DENUNCIA #{numero_fila} REGISTRADA Y GUARDADA EXITOSAMENTE!")
             self.denuncias_exitosas += 1
-            
-            # Cerrar ventana emergente
-            self.driver.close()
-            self.driver.switch_to.window(self.driver.window_handles[0])
+
+            # ═══════════════════════════════════════════════════════════════
+            # VOLVER A "REGISTRO DE DENUNCIAS" PARA LA SIGUIENTE DENUNCIA
+            # NO cerramos la ventana - volvemos al menú lateral
+            # ═══════════════════════════════════════════════════════════════
+            self.log("\n🔄 Preparando para siguiente denuncia...")
             time.sleep(2)
-            
+
+            # Volver a hacer clic en "Registro de Denuncias"
+            self.volver_a_registro_denuncias()
+            time.sleep(2)
+
             return True
-            
+
         except Exception as e:
             self.log(f"❌ Error en denuncia #{numero_fila}: {str(e)}")
             self.denuncias_fallidas += 1
-            
+
+            # Intentar recuperarse para la siguiente denuncia
             try:
-                if len(self.driver.window_handles) > 1:
-                    self.driver.close()
-                    self.driver.switch_to.window(self.driver.window_handles[0])
+                self.log("  🔄 Intentando recuperarse para siguiente denuncia...")
+                self.driver.switch_to.default_content()
+                time.sleep(1)
+                self.volver_a_registro_denuncias()
             except:
                 pass
-            
+
             return False
     
     def ejecutar(self):
