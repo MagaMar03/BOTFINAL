@@ -3634,20 +3634,38 @@ class BotDenunciasSUNAT:
                 self.log("\n📝 PASO 3: Ingresando email y presionando Aceptar...")
 
                 # Rellenar campo de email
-                if not self.rellenar_campo_nuclear("correo", email, "input"):
+                if not self.buscar_y_rellenar_con_javascript("correo", email, "input"):
                     self.log("  ⚠️ No se pudo rellenar el campo de email, continuando...")
 
                 time.sleep(1)
 
-                # Presionar botón Aceptar
-                if not self.clic_boton_con_javascript("aceptar"):
-                    self.log("  ⚠️ No se pudo hacer clic en Aceptar con JS, intentando método alternativo...")
-                    # Intentar con onclick directamente
+                # Presionar botón Aceptar - USANDO FUNCIÓN SUPER NUCLEAR
+                self.log("  🚨 Presionando botón ACEPTAR (MODO SUPER NUCLEAR)...")
+                if not self.clic_boton_aceptar_nuclear():
+                    self.log("  ⚠️ Función nuclear falló, intentando método directo...")
+                    # Fallback: ejecutar función directamente
                     try:
-                        self.driver.execute_script("clickbtn_ejecutar();")
-                        self.log("  ✅ Función clickbtn_ejecutar() ejecutada")
+                        self.driver.execute_script("""
+                        (function() {
+                            function buscar(win, nivel) {
+                                if (nivel > 10) return false;
+                                try {
+                                    if (typeof win.clickbtn_ejecutar === 'function') {
+                                        win.clickbtn_ejecutar();
+                                        return true;
+                                    }
+                                    for (var i = 0; i < win.frames.length; i++) {
+                                        if (buscar(win.frames[i], nivel + 1)) return true;
+                                    }
+                                } catch(e) {}
+                                return false;
+                            }
+                            return buscar(window.top, 0);
+                        })();
+                        """)
+                        self.log("  ✅ Función clickbtn_ejecutar() ejecutada (fallback)")
                     except Exception as e:
-                        self.log(f"  ⚠️ Error ejecutando clickbtn_ejecutar(): {str(e)}")
+                        self.log(f"  ⚠️ Error ejecutando fallback: {str(e)[:50]}")
 
                 time.sleep(3)
 
@@ -4223,20 +4241,284 @@ class BotDenunciasSUNAT:
         self.log("  ❌❌❌ FALLO después de 3 intentos - Botón Imprimir")
         return False
 
+    def clic_boton_aceptar_nuclear(self):
+        """
+        🚨🚨🚨 FUNCIÓN SUPER NUCLEAR - BOTÓN ACEPTAR 🚨🚨🚨
+
+        Selector objetivo:
+        <input type="button" name="btnsubmit" value="Aceptar" onclick="clickbtn_ejecutar()">
+
+        TODOS LOS MÉTODOS DISPONIBLES:
+        - JavaScript Nuclear recursivo (6 estrategias)
+        - Selenium con múltiples selectores
+        - pyautogui
+        - ActionChains
+        - hacer_clic_robusto
+        """
+        self.log("  🚨🚨🚨 MODO SUPER NUCLEAR: Botón Aceptar 🚨🚨🚨")
+        self.log("  → Máximo 3 intentos con 7 niveles cada uno")
+
+        for intento in range(1, 4):
+            self.log(f"\n  🔄 INTENTO {intento}/3 - Botón Aceptar")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 1: JavaScript NUCLEAR - Ejecutar clickbtn_ejecutar()
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🔥 NIVEL 1: JavaScript - Ejecutar clickbtn_ejecutar()...")
+
+            try:
+                js_nuclear = """
+                (function() {
+                    function buscarYClickAceptar(win, nivel) {
+                        if (nivel > 10) return false;
+                        try {
+                            // Método 1: Ejecutar función clickbtn_ejecutar directamente
+                            if (typeof win.clickbtn_ejecutar === 'function') {
+                                win.clickbtn_ejecutar();
+                                return true;
+                            }
+
+                            // Método 2: Buscar botón por onclick
+                            var btns = win.document.querySelectorAll("input[onclick*='clickbtn_ejecutar']");
+                            if (btns.length > 0) { btns[0].click(); return true; }
+
+                            // Método 3: Buscar por value="Aceptar"
+                            btns = win.document.querySelectorAll("input[value='Aceptar']");
+                            if (btns.length > 0) { btns[0].click(); return true; }
+
+                            // Método 4: Buscar por name="btnsubmit" con value Aceptar
+                            btns = win.document.querySelectorAll("input[name='btnsubmit']");
+                            for (var i = 0; i < btns.length; i++) {
+                                if (btns[i].value && btns[i].value.indexOf('Aceptar') !== -1) {
+                                    btns[i].click();
+                                    return true;
+                                }
+                            }
+
+                            // Método 5: Buscar cualquier input type=button con Aceptar
+                            btns = win.document.querySelectorAll("input[type='button']");
+                            for (var i = 0; i < btns.length; i++) {
+                                var val = (btns[i].value || '').toLowerCase();
+                                if (val.indexOf('aceptar') !== -1) {
+                                    btns[i].click();
+                                    return true;
+                                }
+                            }
+
+                            // Método 6: Buscar botones HTML
+                            btns = win.document.querySelectorAll("button");
+                            for (var i = 0; i < btns.length; i++) {
+                                var txt = (btns[i].innerText || btns[i].textContent || '').toLowerCase();
+                                if (txt.indexOf('aceptar') !== -1) {
+                                    btns[i].click();
+                                    return true;
+                                }
+                            }
+
+                            // Buscar en frames hijos
+                            for (var i = 0; i < win.frames.length; i++) {
+                                try { if (buscarYClickAceptar(win.frames[i], nivel + 1)) return true; } catch(e) {}
+                            }
+                        } catch(e) {}
+                        return false;
+                    }
+                    return buscarYClickAceptar(window.top, 0);
+                })();
+                """
+                resultado = self.driver.execute_script(js_nuclear)
+                if resultado:
+                    self.log("  ✅ NIVEL 1 EXITOSO: JavaScript NUCLEAR clickeó Aceptar")
+                    time.sleep(2)
+                    return True
+                else:
+                    self.log("  ⚠️ Nivel 1 falló, continuando...")
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 1 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 2: clic_boton_con_javascript (método existente)
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🎯 NIVEL 2: Usando clic_boton_con_javascript...")
+
+            try:
+                if self.clic_boton_con_javascript("aceptar"):
+                    self.log("  ✅ NIVEL 2 EXITOSO: clic_boton_con_javascript")
+                    time.sleep(2)
+                    return True
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 2 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 3: Selenium - Búsqueda exhaustiva en iframes
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🔍 NIVEL 3: Selenium - Búsqueda exhaustiva...")
+
+            try:
+                self.driver.switch_to.default_content()
+                selectores = [
+                    (By.XPATH, "//input[@onclick=\"clickbtn_ejecutar()\"]"),
+                    (By.XPATH, "//input[contains(@onclick,'clickbtn_ejecutar')]"),
+                    (By.XPATH, "//input[@value='Aceptar']"),
+                    (By.XPATH, "//input[@name='btnsubmit'][@value='Aceptar']"),
+                    (By.XPATH, "//input[@type='button'][contains(@value,'Aceptar')]"),
+                    (By.XPATH, "//button[contains(text(),'Aceptar')]"),
+                    (By.CSS_SELECTOR, "input[value='Aceptar']"),
+                    (By.CSS_SELECTOR, "input[onclick*='ejecutar']"),
+                ]
+
+                def buscar_y_click():
+                    for by, selector in selectores:
+                        try:
+                            elementos = self.driver.find_elements(by, selector)
+                            for elem in elementos:
+                                try:
+                                    if elem.is_displayed() or elem.is_enabled():
+                                        self.driver.execute_script("arguments[0].scrollIntoView(true);", elem)
+                                        time.sleep(0.3)
+                                        self.driver.execute_script("arguments[0].click();", elem)
+                                        return True
+                                except:
+                                    pass
+                        except:
+                            pass
+                    return False
+
+                # Buscar en contexto principal
+                if buscar_y_click():
+                    self.log("  ✅ NIVEL 3 EXITOSO: Selenium en contexto principal")
+                    time.sleep(2)
+                    return True
+
+                # Buscar en iframes
+                iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
+                for iframe in iframes:
+                    try:
+                        self.driver.switch_to.default_content()
+                        self.driver.switch_to.frame(iframe)
+                        if buscar_y_click():
+                            self.log("  ✅ NIVEL 3 EXITOSO: Selenium en iframe")
+                            time.sleep(2)
+                            return True
+
+                        frames = self.driver.find_elements(By.TAG_NAME, "frame")
+                        for frame in frames:
+                            try:
+                                self.driver.switch_to.frame(frame)
+                                if buscar_y_click():
+                                    self.log("  ✅ NIVEL 3 EXITOSO: Selenium en frame interno")
+                                    time.sleep(2)
+                                    return True
+                                self.driver.switch_to.parent_frame()
+                            except:
+                                pass
+                    except:
+                        pass
+
+                self.driver.switch_to.default_content()
+                self.log("  ⚠️ Nivel 3 falló, continuando...")
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 3 error: {str(e)[:50]}")
+                try:
+                    self.driver.switch_to.default_content()
+                except:
+                    pass
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 4: buscar_elemento_universal + hacer_clic_robusto
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🎯 NIVEL 4: buscar_elemento_universal + hacer_clic_robusto...")
+
+            try:
+                elemento = self.buscar_elemento_universal("aceptar", "button")
+                if elemento:
+                    if self.hacer_clic_robusto(elemento, "Botón Aceptar"):
+                        self.log("  ✅ NIVEL 4 EXITOSO: Universal + Robusto")
+                        time.sleep(2)
+                        return True
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 4 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 5: buscar_en_todos_contextos_recursivo + clic
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🔄 NIVEL 5: Búsqueda recursiva en todos contextos...")
+
+            try:
+                elemento = self.buscar_en_todos_contextos_recursivo(By.XPATH, "//input[@value='Aceptar']")
+                if elemento:
+                    self.driver.execute_script("arguments[0].click();", elemento)
+                    self.log("  ✅ NIVEL 5 EXITOSO: Recursivo + clic")
+                    time.sleep(2)
+                    return True
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 5 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 6: ActionChains
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🎮 NIVEL 6: ActionChains...")
+
+            try:
+                from selenium.webdriver.common.action_chains import ActionChains
+                self.driver.switch_to.default_content()
+
+                for by, selector in selectores[:4]:
+                    try:
+                        elem = self.driver.find_element(by, selector)
+                        actions = ActionChains(self.driver)
+                        actions.move_to_element(elem).pause(0.5).click().perform()
+                        self.log("  ✅ NIVEL 6 EXITOSO: ActionChains")
+                        time.sleep(2)
+                        return True
+                    except:
+                        pass
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 6 error: {str(e)[:50]}")
+
+            # ═══════════════════════════════════════════════════════════════
+            # NIVEL 7: pyautogui - Tab + Enter
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  ⌨️ NIVEL 7: pyautogui - Tab + Enter...")
+
+            try:
+                import pyautogui
+                time.sleep(1)
+                # Intentar Tab para llegar al botón
+                for i in range(5):
+                    pyautogui.press('tab')
+                    time.sleep(0.2)
+                pyautogui.press('enter')
+                self.log("  ✅ NIVEL 7 EXITOSO: pyautogui Tab + Enter")
+                time.sleep(2)
+                return True
+            except Exception as e:
+                self.log(f"  ⚠️ Nivel 7 error: {str(e)[:50]}")
+
+            # Esperar antes del siguiente intento
+            if intento < 3:
+                wait_time = intento * 2
+                self.log(f"  ⏳ Esperando {wait_time}s antes del siguiente intento...")
+                time.sleep(wait_time)
+
+        self.log("  ❌❌❌ FALLO después de 3 intentos - Botón Aceptar")
+        return False
+
     def guardar_pdf_chrome(self, ruta_guardado, nombre_archivo):
         """
-        🚨🚨🚨 FUNCIÓN GARANTIZADA - GUARDAR PDF 🚨🚨🚨
+        🚨🚨🚨 FUNCIÓN SUPER NUCLEAR - GUARDAR PDF 🚨🚨🚨
 
         Guarda el PDF en: D:\DATA\Karencita\PROGRAMACIÓN\DENUNCIAS\DENUNCIAS MASIVAS
         Con nombre: {numero_orden}.pdf
 
-        ESTRATEGIA SIMPLE Y DIRECTA:
-        1. Copiar ruta completa al portapapeles
-        2. Ctrl+A para seleccionar todo
-        3. Ctrl+V para pegar
-        4. Enter para guardar
+        TODOS LOS MÉTODOS DISPONIBLES:
+        - NIVEL 1: pyperclip + Ctrl+A + Ctrl+V + Enter
+        - NIVEL 2: Alt+D (barra dirección) + navegación
+        - NIVEL 3: pyautogui.write() directo
+        - NIVEL 4: F6 + navegación alternativa
+        - NIVEL 5: Buscar en Downloads y mover
+        - NIVEL 6: Esperar y reintentar con verificación
         """
-        self.log(f"  🚨🚨🚨 MODO PERSISTENTE: Guardando PDF 🚨🚨🚨")
+        self.log(f"  🚨🚨🚨 MODO SUPER NUCLEAR: Guardando PDF 🚨🚨🚨")
         self.log(f"  💾 Archivo: {nombre_archivo}")
         self.log(f"  📂 Ruta: {ruta_guardado}")
 
@@ -4357,9 +4639,79 @@ class BotDenunciasSUNAT:
                     self.log(f"  ⚠️ Nivel 2 error: {str(e)[:80]}")
 
                 # ═══════════════════════════════════════════════════════════════
-                # MÉTODO 3: Buscar en Downloads y mover
+                # MÉTODO 3: pyautogui.write() directo (caracteres uno por uno)
                 # ═══════════════════════════════════════════════════════════════
-                self.log("  🔍 NIVEL 3: Buscando en Downloads...")
+                self.log("  ⌨️ NIVEL 3: pyautogui.write() directo...")
+
+                try:
+                    import pyautogui
+
+                    time.sleep(1)
+
+                    # Seleccionar todo y escribir la ruta directamente
+                    pyautogui.hotkey('ctrl', 'a')
+                    time.sleep(0.3)
+
+                    # Escribir la ruta caracter por caracter (más lento pero más confiable)
+                    pyautogui.write(ruta_completa, interval=0.02)
+                    time.sleep(0.5)
+
+                    # Enter para guardar
+                    pyautogui.press('enter')
+                    self.log(f"  → Enter presionado")
+                    time.sleep(3)
+
+                    pyautogui.press('enter')  # Confirmación
+                    time.sleep(2)
+
+                    if os.path.exists(ruta_completa):
+                        self.log(f"  ✅ NIVEL 3 EXITOSO: Archivo guardado con write()")
+                        return True
+                    else:
+                        self.log(f"  ⚠️ Nivel 3: Archivo no encontrado...")
+
+                except Exception as e:
+                    self.log(f"  ⚠️ Nivel 3 error: {str(e)[:80]}")
+
+                # ═══════════════════════════════════════════════════════════════
+                # MÉTODO 4: F6 + navegación alternativa
+                # ═══════════════════════════════════════════════════════════════
+                self.log("  🔧 NIVEL 4: F6 + navegación alternativa...")
+
+                try:
+                    import pyautogui
+                    import pyperclip
+
+                    time.sleep(1)
+
+                    # F6 a veces funciona para ir a la barra de dirección
+                    pyautogui.press('f6')
+                    time.sleep(0.5)
+
+                    # Pegar ruta completa
+                    pyperclip.copy(ruta_completa)
+                    pyautogui.hotkey('ctrl', 'v')
+                    time.sleep(0.5)
+
+                    pyautogui.press('enter')
+                    time.sleep(3)
+
+                    pyautogui.press('enter')
+                    time.sleep(2)
+
+                    if os.path.exists(ruta_completa):
+                        self.log(f"  ✅ NIVEL 4 EXITOSO: Archivo guardado con F6")
+                        return True
+                    else:
+                        self.log(f"  ⚠️ Nivel 4: Archivo no encontrado...")
+
+                except Exception as e:
+                    self.log(f"  ⚠️ Nivel 4 error: {str(e)[:80]}")
+
+                # ═══════════════════════════════════════════════════════════════
+                # MÉTODO 5: Buscar en Downloads y mover
+                # ═══════════════════════════════════════════════════════════════
+                self.log("  🔍 NIVEL 5: Buscando en Downloads...")
 
                 try:
                     # Buscar en Downloads
@@ -4375,7 +4727,7 @@ class BotDenunciasSUNAT:
                         shutil.move(archivo_downloads, ruta_completa)
 
                         if os.path.exists(ruta_completa):
-                            self.log(f"  ✅ NIVEL 3 EXITOSO: Archivo movido desde Downloads")
+                            self.log(f"  ✅ NIVEL 5 EXITOSO: Archivo movido desde Downloads")
                             return True
 
                     # También buscar con variaciones del nombre
@@ -4385,11 +4737,48 @@ class BotDenunciasSUNAT:
                             import shutil
                             shutil.move(archivo_encontrado, ruta_completa)
                             if os.path.exists(ruta_completa):
-                                self.log(f"  ✅ NIVEL 3 EXITOSO: Archivo encontrado y movido")
+                                self.log(f"  ✅ NIVEL 5 EXITOSO: Archivo encontrado y movido")
                                 return True
 
                 except Exception as e:
-                    self.log(f"  ⚠️ Nivel 3 error: {str(e)[:80]}")
+                    self.log(f"  ⚠️ Nivel 5 error: {str(e)[:80]}")
+
+                # ═══════════════════════════════════════════════════════════════
+                # MÉTODO 6: Reintentar con Escape + combinación
+                # ═══════════════════════════════════════════════════════════════
+                self.log("  🔁 NIVEL 6: Reintentar con Escape + combinación...")
+
+                try:
+                    import pyautogui
+                    import pyperclip
+
+                    # Cancelar cualquier estado anterior
+                    pyautogui.press('escape')
+                    time.sleep(1)
+
+                    # Ctrl+S por si no se abrió el diálogo
+                    pyautogui.hotkey('ctrl', 's')
+                    time.sleep(2)
+
+                    # Intentar pegar la ruta
+                    pyperclip.copy(ruta_completa)
+                    pyautogui.hotkey('ctrl', 'a')
+                    time.sleep(0.2)
+                    pyautogui.hotkey('ctrl', 'v')
+                    time.sleep(0.5)
+
+                    pyautogui.press('enter')
+                    time.sleep(3)
+
+                    pyautogui.press('enter')
+                    time.sleep(2)
+
+                    if os.path.exists(ruta_completa):
+                        self.log(f"  ✅ NIVEL 6 EXITOSO: Archivo guardado con reintentar")
+                        return True
+
+                except Exception as e:
+                    self.log(f"  ⚠️ Nivel 6 error: {str(e)[:80]}")
 
                 # Esperar antes del siguiente intento
                 if intento < 3:
