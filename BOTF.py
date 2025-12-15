@@ -4212,7 +4212,19 @@ class BotDenunciasSUNAT:
             pass
 
         time.sleep(2)
-        self.log("  ✅ Secuencia de impresión completada")
+
+        # ═══════════════════════════════════════════════════════════════
+        # PASO 4: Si nada funcionó, cerrar diálogo con Escape
+        # ═══════════════════════════════════════════════════════════════
+        self.log("  🔴 PASO 4: Presionando Escape para cerrar diálogo si está abierto...")
+        try:
+            for _ in range(3):
+                pyautogui.press('escape')
+                time.sleep(0.5)
+        except:
+            pass
+
+        self.log("  ✅ Secuencia de impresión completada (diálogo cerrado si estaba abierto)")
         return True
 
     def clic_boton_aceptar_nuclear(self):
@@ -4763,10 +4775,31 @@ class BotDenunciasSUNAT:
             # Si llegamos aquí, todos los intentos fallaron
             self.log("  ❌❌❌ FALLO después de 3 intentos - Guardado de PDF")
             self.log("  ℹ️ CONSEJO: Asegúrate de que la ventana de guardado esté visible")
+
+            # ═══════════════════════════════════════════════════════════════
+            # LIMPIEZA FINAL: Cerrar cualquier diálogo abierto para no quedar colgado
+            # ═══════════════════════════════════════════════════════════════
+            self.log("  🧹 Cerrando diálogos abiertos para continuar...")
+            try:
+                import pyautogui
+                for _ in range(5):
+                    pyautogui.press('escape')
+                    time.sleep(0.3)
+            except:
+                pass
+
             return False
 
         except Exception as e:
             self.log(f"  ❌ Error general: {str(e)[:100]}")
+            # Cerrar diálogos antes de salir
+            try:
+                import pyautogui
+                for _ in range(3):
+                    pyautogui.press('escape')
+                    time.sleep(0.3)
+            except:
+                pass
             return False
 
     # ============================================
