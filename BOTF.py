@@ -4066,9 +4066,11 @@ class BotDenunciasSUNAT:
         🚨🚨🚨 FUNCIÓN SUPER NUCLEAR - BOTÓN IMPRIMIR (Diálogo Edge/Chrome) 🚨🚨🚨
 
         El diálogo de impresión ya está abierto.
-        El botón "Imprimir" es azul y está en la esquina inferior derecha.
+        El botón "Imprimir" es azul y puede estar en DOS ubicaciones:
+          - IZQUIERDA: Panel lateral izquierdo (nuevo diseño Chrome/Edge)
+          - DERECHA: Esquina inferior derecha (diseño antiguo)
 
-        PROBLEMA IDENTIFICADO: pyautogui.press('enter') no llega al diálogo.
+        CUBRE AMBOS FORMATOS automáticamente.
         SOLUCIÓN: Múltiples métodos SIN retornar hasta probar todos.
         """
         self.log("  🚨🚨🚨 MODO SUPER NUCLEAR: Botón Imprimir 🚨🚨🚨")
@@ -4106,23 +4108,51 @@ class BotDenunciasSUNAT:
                 pass
 
             # MÉTODO B: Click en coordenadas del botón Imprimir
-            # Basado en tu screenshot: el botón está abajo a la derecha del diálogo
-            self.log("  [B] Click en coordenadas del botón...")
+            # CUBRE AMBOS FORMATOS: Panel IZQUIERDO y Panel DERECHO
+            self.log("  [B] Click en coordenadas del botón (IZQUIERDA + DERECHA)...")
             try:
-                # El diálogo de impresión ocupa aprox 60% de la pantalla
-                # El botón Imprimir está en la esquina inferior derecha del diálogo
-                posiciones_boton = [
+                # ═════════════════════════════════════════════════════════════
+                # FORMATO 1: Panel en el LADO IZQUIERDO (nuevo diseño Chrome/Edge)
+                # El panel ocupa aprox 20-25% izquierdo de la pantalla
+                # El botón "Imprimir" azul está abajo del panel izquierdo
+                # ═════════════════════════════════════════════════════════════
+                posiciones_izquierda = [
+                    (int(screen_width * 0.10), int(screen_height * 0.72)),  # 10% desde izquierda
+                    (int(screen_width * 0.12), int(screen_height * 0.73)),  # 12% desde izquierda
+                    (int(screen_width * 0.08), int(screen_height * 0.71)),  # 8% desde izquierda
+                    (int(screen_width * 0.11), int(screen_height * 0.74)),  # 11% desde izquierda
+                    (100, 550),   # Coordenadas fijas para resolución común
+                    (110, 545),
+                    (95, 555),
+                    (105, 540),
+                    (120, 560),
+                ]
+
+                # ═════════════════════════════════════════════════════════════
+                # FORMATO 2: Panel en el LADO DERECHO (diseño antiguo)
+                # El botón está en la esquina inferior derecha del diálogo
+                # ═════════════════════════════════════════════════════════════
+                posiciones_derecha = [
                     (int(screen_width * 0.56), int(screen_height * 0.84)),
                     (int(screen_width * 0.58), int(screen_height * 0.85)),
                     (int(screen_width * 0.54), int(screen_height * 0.83)),
                     (750, 520),
                     (760, 525),
-                    (770, 530),
-                    (780, 535),
                 ]
-                for x, y in posiciones_boton:
+
+                # Primero intentar IZQUIERDA (formato más común ahora)
+                self.log("    → Probando lado IZQUIERDO...")
+                for x, y in posiciones_izquierda:
                     pyautogui.click(x, y)
-                    time.sleep(0.3)
+                    time.sleep(0.2)
+
+                time.sleep(0.5)
+
+                # Luego intentar DERECHA (formato alternativo)
+                self.log("    → Probando lado DERECHO...")
+                for x, y in posiciones_derecha:
+                    pyautogui.click(x, y)
+                    time.sleep(0.2)
             except:
                 pass
 
@@ -4139,9 +4169,15 @@ class BotDenunciasSUNAT:
             except:
                 pass
 
-            # MÉTODO D: Alt + clic (por si hay overlay)
-            self.log("  [D] Alt + Click...")
+            # MÉTODO D: Alt + clic (por si hay overlay) - AMBOS LADOS
+            self.log("  [D] Alt + Click (IZQUIERDA y DERECHA)...")
             try:
+                # Lado IZQUIERDO primero
+                pyautogui.keyDown('alt')
+                pyautogui.click(int(screen_width * 0.10), int(screen_height * 0.72))
+                pyautogui.keyUp('alt')
+                time.sleep(0.3)
+                # Lado DERECHO
                 pyautogui.keyDown('alt')
                 pyautogui.click(int(screen_width * 0.56), int(screen_height * 0.84))
                 pyautogui.keyUp('alt')
@@ -4149,9 +4185,13 @@ class BotDenunciasSUNAT:
             except:
                 pass
 
-            # MÉTODO E: Doble clic en el botón
-            self.log("  [E] Doble clic...")
+            # MÉTODO E: Doble clic en el botón - AMBOS LADOS
+            self.log("  [E] Doble clic (IZQUIERDA y DERECHA)...")
             try:
+                # Lado IZQUIERDO primero
+                pyautogui.doubleClick(int(screen_width * 0.10), int(screen_height * 0.72))
+                time.sleep(0.3)
+                # Lado DERECHO
                 pyautogui.doubleClick(int(screen_width * 0.56), int(screen_height * 0.84))
                 time.sleep(1)
             except:
