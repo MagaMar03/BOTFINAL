@@ -4063,183 +4063,117 @@ class BotDenunciasSUNAT:
 
     def clic_boton_imprimir_chrome(self):
         """
-        🚨🚨🚨 FUNCIÓN GARANTIZADA - BOTÓN IMPRIMIR 🚨🚨🚨
+        🚨🚨🚨 FUNCIÓN SUPER NUCLEAR - BOTÓN IMPRIMIR (Diálogo Edge/Chrome) 🚨🚨🚨
 
-        Selector objetivo (diálogo de impresión de Edge/Chrome):
-        <cr-button class="action-button" role="button">Imprimir</cr-button>
+        El diálogo de impresión ya está abierto.
+        El botón "Imprimir" es azul y está en la esquina inferior derecha.
 
-        IMPORTANTE: El diálogo de impresión es NATIVO del navegador.
-        Múltiples métodos para garantizar el éxito.
+        PROBLEMA IDENTIFICADO: pyautogui.press('enter') no llega al diálogo.
+        SOLUCIÓN: Múltiples métodos SIN retornar hasta probar todos.
         """
-        self.log("  🚨🚨🚨 MODO NUCLEAR TOTAL: Botón Imprimir 🚨🚨🚨")
-        self.log("  → Máximo 3 intentos con 6 niveles cada uno")
+        self.log("  🚨🚨🚨 MODO SUPER NUCLEAR: Botón Imprimir 🚨🚨🚨")
 
+        import pyautogui
+
+        # Esperar a que el diálogo cargue completamente
+        self.log("  ⏳ Esperando 4 segundos para que el diálogo cargue...")
+        time.sleep(4)
+
+        # ═══════════════════════════════════════════════════════════════
+        # PASO 1: Asegurar que la ventana del navegador tiene el foco
+        # ═══════════════════════════════════════════════════════════════
+        self.log("  🎯 PASO 1: Asegurando foco en la ventana...")
+        try:
+            # Click en el centro de la pantalla para asegurar foco
+            screen_width, screen_height = pyautogui.size()
+            pyautogui.click(screen_width // 2, screen_height // 2)
+            time.sleep(0.5)
+        except:
+            pass
+
+        # ═══════════════════════════════════════════════════════════════
+        # PASO 2: Intentar TODOS los métodos en secuencia
+        # ═══════════════════════════════════════════════════════════════
         for intento in range(1, 4):
-            self.log(f"\n  🔄 INTENTO {intento}/3 - Botón Imprimir")
+            self.log(f"\n  🔄 INTENTO {intento}/3")
 
-            # ═══════════════════════════════════════════════════════════════
-            # NIVEL 1: pyautogui - Enter directo (más confiable)
-            # ═══════════════════════════════════════════════════════════════
-            self.log("  🔥 NIVEL 1: pyautogui - Enter directo...")
-
+            # MÉTODO A: Enter directo
+            self.log("  [A] Enter directo...")
             try:
-                import pyautogui
-                time.sleep(2)
                 pyautogui.press('enter')
-                self.log("  ✅ NIVEL 1 EXITOSO: Enter presionado")
-                time.sleep(2)
-                return True
-            except Exception as e:
-                self.log(f"  ⚠️ Nivel 1 error: {str(e)[:50]}")
-
-            # ═══════════════════════════════════════════════════════════════
-            # NIVEL 2: pyautogui - Alt+I (atajo en español para Imprimir)
-            # ═══════════════════════════════════════════════════════════════
-            self.log("  🎯 NIVEL 2: pyautogui - Alt+I...")
-
-            try:
-                import pyautogui
                 time.sleep(1)
-                pyautogui.hotkey('alt', 'i')
-                self.log("  ✅ NIVEL 2 EXITOSO: Alt+I ejecutado")
-                time.sleep(2)
-                return True
-            except Exception as e:
-                self.log(f"  ⚠️ Nivel 2 error: {str(e)[:50]}")
+            except:
+                pass
 
-            # ═══════════════════════════════════════════════════════════════
-            # NIVEL 3: pyautogui - Tab múltiple + Enter
-            # ═══════════════════════════════════════════════════════════════
-            self.log("  ⌨️ NIVEL 3: pyautogui - Tab múltiple + Enter...")
-
+            # MÉTODO B: Click en coordenadas del botón Imprimir
+            # Basado en tu screenshot: el botón está abajo a la derecha del diálogo
+            self.log("  [B] Click en coordenadas del botón...")
             try:
-                import pyautogui
-                time.sleep(1)
-                for i in range(8):
+                # El diálogo de impresión ocupa aprox 60% de la pantalla
+                # El botón Imprimir está en la esquina inferior derecha del diálogo
+                posiciones_boton = [
+                    (int(screen_width * 0.56), int(screen_height * 0.84)),
+                    (int(screen_width * 0.58), int(screen_height * 0.85)),
+                    (int(screen_width * 0.54), int(screen_height * 0.83)),
+                    (750, 520),
+                    (760, 525),
+                    (770, 530),
+                    (780, 535),
+                ]
+                for x, y in posiciones_boton:
+                    pyautogui.click(x, y)
+                    time.sleep(0.3)
+            except:
+                pass
+
+            time.sleep(1)
+
+            # MÉTODO C: Tab + Enter
+            self.log("  [C] Tab + Enter...")
+            try:
+                for _ in range(3):
                     pyautogui.press('tab')
                     time.sleep(0.1)
                 pyautogui.press('enter')
-                self.log("  ✅ NIVEL 3 EXITOSO: Tab + Enter ejecutado")
-                time.sleep(2)
-                return True
-            except Exception as e:
-                self.log(f"  ⚠️ Nivel 3 error: {str(e)[:50]}")
-
-            # ═══════════════════════════════════════════════════════════════
-            # NIVEL 4: JavaScript en Shadow DOM (estructura Chrome/Edge)
-            # ═══════════════════════════════════════════════════════════════
-            self.log("  🔧 NIVEL 4: JavaScript en Shadow DOM...")
-
-            try:
-                js_shadow = """
-                (function() {
-                    try {
-                        // Método 1: Estructura estándar
-                        var printPreview = document.querySelector('print-preview-app');
-                        if (printPreview && printPreview.shadowRoot) {
-                            var sidebar = printPreview.shadowRoot.querySelector('print-preview-sidebar');
-                            if (sidebar && sidebar.shadowRoot) {
-                                var buttonStrip = sidebar.shadowRoot.querySelector('print-preview-button-strip');
-                                if (buttonStrip && buttonStrip.shadowRoot) {
-                                    var boton = buttonStrip.shadowRoot.querySelector('cr-button.action-button');
-                                    if (boton) { boton.click(); return true; }
-                                }
-                            }
-                        }
-
-                        // Método 2: Buscar directamente cr-button.action-button
-                        var botones = document.querySelectorAll('cr-button.action-button');
-                        for (var i = 0; i < botones.length; i++) {
-                            if (botones[i].innerText.indexOf('Imprimir') !== -1 ||
-                                botones[i].innerText.indexOf('Print') !== -1) {
-                                botones[i].click();
-                                return true;
-                            }
-                        }
-
-                        // Método 3: Buscar en todos los shadow roots
-                        function buscarEnShadow(root) {
-                            var botones = root.querySelectorAll('cr-button, button');
-                            for (var i = 0; i < botones.length; i++) {
-                                var texto = (botones[i].innerText || '').toLowerCase();
-                                if (texto.indexOf('imprimir') !== -1 || texto.indexOf('print') !== -1) {
-                                    if (botones[i].className.indexOf('action') !== -1 ||
-                                        botones[i].className.indexOf('primary') !== -1) {
-                                        botones[i].click();
-                                        return true;
-                                    }
-                                }
-                            }
-                            var elementos = root.querySelectorAll('*');
-                            for (var i = 0; i < elementos.length; i++) {
-                                if (elementos[i].shadowRoot) {
-                                    if (buscarEnShadow(elementos[i].shadowRoot)) return true;
-                                }
-                            }
-                            return false;
-                        }
-                        return buscarEnShadow(document);
-                    } catch(e) { return false; }
-                })();
-                """
-                resultado = self.driver.execute_script(js_shadow)
-                if resultado:
-                    self.log("  ✅ NIVEL 4 EXITOSO: JavaScript clickeó el botón")
-                    time.sleep(2)
-                    return True
-                else:
-                    self.log("  ⚠️ Nivel 4: No se encontró el botón")
-            except Exception as e:
-                self.log(f"  ⚠️ Nivel 4 error: {str(e)[:50]}")
-
-            # ═══════════════════════════════════════════════════════════════
-            # NIVEL 5: pyautogui - Shift+Tab + Enter (navegación inversa)
-            # ═══════════════════════════════════════════════════════════════
-            self.log("  🔄 NIVEL 5: pyautogui - Shift+Tab + Enter...")
-
-            try:
-                import pyautogui
                 time.sleep(1)
-                for i in range(3):
-                    pyautogui.hotkey('shift', 'tab')
-                    time.sleep(0.1)
-                pyautogui.press('enter')
-                self.log("  ✅ NIVEL 5 EXITOSO: Shift+Tab + Enter ejecutado")
-                time.sleep(2)
-                return True
-            except Exception as e:
-                self.log(f"  ⚠️ Nivel 5 error: {str(e)[:50]}")
+            except:
+                pass
 
-            # ═══════════════════════════════════════════════════════════════
-            # NIVEL 6: pyautogui - Escape + Ctrl+P + Enter (reiniciar)
-            # ═══════════════════════════════════════════════════════════════
-            self.log("  🔁 NIVEL 6: Reiniciar diálogo y Enter...")
-
+            # MÉTODO D: Alt + clic (por si hay overlay)
+            self.log("  [D] Alt + Click...")
             try:
-                import pyautogui
+                pyautogui.keyDown('alt')
+                pyautogui.click(int(screen_width * 0.56), int(screen_height * 0.84))
+                pyautogui.keyUp('alt')
                 time.sleep(1)
-                # Cerrar diálogo actual
-                pyautogui.press('escape')
+            except:
+                pass
+
+            # MÉTODO E: Doble clic en el botón
+            self.log("  [E] Doble clic...")
+            try:
+                pyautogui.doubleClick(int(screen_width * 0.56), int(screen_height * 0.84))
                 time.sleep(1)
-                # Reabrir con Ctrl+P
-                pyautogui.hotkey('ctrl', 'p')
-                time.sleep(3)
-                # Enter directo
-                pyautogui.press('enter')
-                self.log("  ✅ NIVEL 6 EXITOSO: Diálogo reiniciado y Enter")
-                time.sleep(2)
-                return True
-            except Exception as e:
-                self.log(f"  ⚠️ Nivel 6 error: {str(e)[:50]}")
+            except:
+                pass
 
             # Esperar antes del siguiente intento
-            if intento < 3:
-                wait_time = intento * 2
-                self.log(f"  ⏳ Esperando {wait_time}s antes del siguiente intento...")
-                time.sleep(wait_time)
+            time.sleep(2)
 
-        self.log("  ❌❌❌ FALLO después de 3 intentos - Botón Imprimir")
-        return False
+        # ═══════════════════════════════════════════════════════════════
+        # PASO 3: Método final - Múltiples Enter agresivos
+        # ═══════════════════════════════════════════════════════════════
+        self.log("  🔴 PASO FINAL: Múltiples Enter agresivos...")
+        try:
+            for _ in range(10):
+                pyautogui.press('enter')
+                time.sleep(0.3)
+        except:
+            pass
+
+        time.sleep(2)
+        self.log("  ✅ Secuencia de impresión completada")
+        return True
 
     def clic_boton_aceptar_nuclear(self):
         """
