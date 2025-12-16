@@ -33,21 +33,23 @@ import json
 # CLASE PRINCIPAL DEL BOT
 # ============================================
 class BotDenunciasSUNAT:
-    
-    def __init__(self, archivo_excel, usuario, password, interfaz):
+
+    def __init__(self, archivo_excel, usuario, password, interfaz, sin_pdf=False):
         self.archivo_excel = archivo_excel
         self.USUARIO = usuario
         self.PASSWORD = password
         self.interfaz = interfaz
-        
+        self.sin_pdf = sin_pdf  # Si True, no imprime ni guarda PDF
+
         self.driver = None
         self.wait = None
         self.denuncias_exitosas = 0
         self.denuncias_fallidas = 0
-        
+
         self.URL_LOGIN = "https://intranet.sunat.peru/cl-at-iamenu/"
-        
-        self.log("Bot inicializado correctamente (Microsoft Edge)")
+
+        modo = "SIN PDF" if sin_pdf else "CON PDF"
+        self.log(f"Bot inicializado correctamente (Microsoft Edge) - Modo: {modo}")
     
     def log(self, mensaje):
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -3670,40 +3672,46 @@ class BotDenunciasSUNAT:
                 time.sleep(3)
 
             # ═══════════════════════════════════════════════════════════════
-            # PASO 4: PRESIONAR "IMPRIMIR CONSTANCIA"
+            # PASOS 4, 5, 6: IMPRIMIR Y GUARDAR PDF (Solo si sin_pdf=False)
             # ═══════════════════════════════════════════════════════════════
-            self.log("\n🖨️ PASO 4: Presionando 'Imprimir Constancia'...")
+            if not self.sin_pdf:
+                # PASO 4: PRESIONAR "IMPRIMIR CONSTANCIA"
+                self.log("\n🖨️ PASO 4: Presionando 'Imprimir Constancia'...")
 
-            if not self.clic_imprimir_constancia_nuclear():
-                raise Exception("No se pudo hacer clic en 'Imprimir Constancia'")
+                if not self.clic_imprimir_constancia_nuclear():
+                    raise Exception("No se pudo hacer clic en 'Imprimir Constancia'")
 
-            time.sleep(3)
+                time.sleep(3)
 
-            # ═══════════════════════════════════════════════════════════════
-            # PASO 5: PRESIONAR BOTÓN "IMPRIMIR"
-            # ═══════════════════════════════════════════════════════════════
-            self.log("\n🖨️ PASO 5: Presionando botón 'Imprimir'...")
+                # PASO 5: PRESIONAR BOTÓN "IMPRIMIR"
+                self.log("\n🖨️ PASO 5: Presionando botón 'Imprimir'...")
 
-            if not self.clic_boton_imprimir_chrome():
-                raise Exception("No se pudo hacer clic en el botón Imprimir")
+                if not self.clic_boton_imprimir_chrome():
+                    raise Exception("No se pudo hacer clic en el botón Imprimir")
 
-            time.sleep(2)
+                time.sleep(2)
 
-            # ═══════════════════════════════════════════════════════════════
-            # PASO 6: GUARDAR ARCHIVO PDF
-            # ═══════════════════════════════════════════════════════════════
-            self.log("\n💾 PASO 6: Guardando archivo PDF...")
+                # PASO 6: GUARDAR ARCHIVO PDF
+                self.log("\n💾 PASO 6: Guardando archivo PDF...")
 
-            ruta_guardado = r"D:\DATA\Karencita\PROGRAMACIÓN\DENUNCIAS\DENUNCIAS MASIVAS"
-            nombre_archivo = f"{numero_orden}.pdf"
+                ruta_guardado = r"D:\DATA\Karencita\PROGRAMACIÓN\DENUNCIAS\DENUNCIAS MASIVAS"
+                nombre_archivo = f"{numero_orden}.pdf"
 
-            if not self.guardar_pdf_chrome(ruta_guardado, nombre_archivo):
-                raise Exception("No se pudo guardar el archivo PDF")
+                if not self.guardar_pdf_chrome(ruta_guardado, nombre_archivo):
+                    raise Exception("No se pudo guardar el archivo PDF")
+            else:
+                # MODO SIN PDF: Saltar pasos 4, 5, 6
+                self.log("\n⏭️ MODO SIN PDF: Saltando Imprimir Constancia y guardado de PDF")
+                self.log(f"  ✅ Denuncia {numero_orden} registrada (sin PDF)")
 
             self.log(f"\n{'='*70}")
-            self.log(f"✅✅✅ DENUNCIA COMPLETADA Y GUARDADA ✅✅✅")
-            self.log(f"📁 Archivo: {nombre_archivo}")
-            self.log(f"📂 Ruta: {ruta_guardado}")
+            if not self.sin_pdf:
+                self.log(f"✅✅✅ DENUNCIA COMPLETADA Y GUARDADA ✅✅✅")
+                self.log(f"📁 Archivo: {nombre_archivo}")
+                self.log(f"📂 Ruta: {ruta_guardado}")
+            else:
+                self.log(f"✅✅✅ DENUNCIA REGISTRADA (SIN PDF) ✅✅✅")
+                self.log(f"📋 Número de Orden: {numero_orden}")
             self.log(f"{'='*70}")
 
             return True
@@ -5809,6 +5817,23 @@ class InterfazBotMejorada:
         )
         self.btn_cancelar.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.BOTH)
 
+        # Botón 3: INICIAR SIN PDF (NUEVO)
+        self.btn_sin_pdf = tk.Button(
+            frame_botones,
+            text="⚡ INICIAR\nSIN PDF",
+            command=self.iniciar_proceso_sin_pdf,
+            font=("Segoe UI", 9, "bold"),
+            bg="#f59e0b",  # Color naranja/ámbar
+            fg="white",
+            cursor="hand2",
+            width=20,
+            height=2,
+            relief=tk.RAISED,
+            bd=2,
+            activebackground="#d97706"
+        )
+        self.btn_sin_pdf.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.BOTH)
+
         # ═══════════════════════════════════════
         # BARRA DE ESTADO (COMPACTA)
         # ═══════════════════════════════════════
@@ -5887,12 +5912,41 @@ class InterfazBotMejorada:
 
         self.limpiar_consola()
         self.btn_iniciar.config(state="disabled")
+        self.btn_sin_pdf.config(state="disabled")
         self.btn_cancelar.config(state="normal")
         self.proceso_activo = True
         self.label_estado.config(text="●  Estado: Proceso automático en ejecución...", fg=self.COLOR_EXITO)
 
         # Ejecutar bot en hilo separado
         self.hilo_proceso = threading.Thread(target=self._ejecutar_bot_automatico, daemon=True)
+        self.hilo_proceso.start()
+
+    def iniciar_proceso_sin_pdf(self):
+        """Inicia el proceso automático SIN guardar PDF"""
+        if not self.validar_campos():
+            return
+
+        respuesta = messagebox.askyesno(
+            "Confirmar - Modo SIN PDF",
+            "¿Desea iniciar el proceso SIN GUARDAR PDF?\n\n"
+            "⚡ Este modo es más RÁPIDO porque:\n"
+            "   • NO presiona 'Imprimir Constancia'\n"
+            "   • NO guarda archivos PDF\n\n"
+            "Las denuncias se registrarán pero sin generar constancias PDF."
+        )
+
+        if not respuesta:
+            return
+
+        self.limpiar_consola()
+        self.btn_iniciar.config(state="disabled")
+        self.btn_sin_pdf.config(state="disabled")
+        self.btn_cancelar.config(state="normal")
+        self.proceso_activo = True
+        self.label_estado.config(text="●  Estado: Proceso SIN PDF en ejecución...", fg="#f59e0b")
+
+        # Ejecutar bot en hilo separado (con sin_pdf=True)
+        self.hilo_proceso = threading.Thread(target=self._ejecutar_bot_sin_pdf, daemon=True)
         self.hilo_proceso.start()
 
     def cancelar_proceso(self):
@@ -5914,6 +5968,7 @@ class InterfazBotMejorada:
                     pass
 
             self.btn_iniciar.config(state="normal")
+            self.btn_sin_pdf.config(state="normal")
             self.btn_cancelar.config(state="disabled")
 
     def _ejecutar_bot_automatico(self):
@@ -5956,6 +6011,52 @@ class InterfazBotMejorada:
 
         finally:
             self.btn_iniciar.config(state="normal")
+            self.btn_sin_pdf.config(state="normal")
+            self.btn_cancelar.config(state="disabled")
+            self.proceso_activo = False
+
+    def _ejecutar_bot_sin_pdf(self):
+        """Hilo que ejecuta el bot automático SIN guardar PDF"""
+        try:
+            self.escribir_consola("⚡ Iniciando proceso SIN PDF...\n")
+            self.escribir_consola("="*60 + "\n")
+
+            # Crear instancia del bot con sin_pdf=True
+            self.bot = BotDenunciasSUNAT(
+                archivo_excel=self.ruta_archivo.get(),
+                usuario=self.usuario.get(),
+                password=self.password.get(),
+                interfaz=self,
+                sin_pdf=True  # ← DIFERENCIA: No guarda PDF
+            )
+
+            # Ejecutar bot
+            self.bot.ejecutar()
+
+            # Mostrar resumen final
+            if hasattr(self.bot, 'denuncias_exitosas'):
+                self.escribir_consola("\n" + "="*60 + "\n")
+                self.escribir_consola(f"⚡ PROCESO SIN PDF COMPLETADO\n")
+                self.escribir_consola(f"   Denuncias registradas: {self.bot.denuncias_exitosas}\n")
+                if hasattr(self.bot, 'denuncias_fallidas'):
+                    self.escribir_consola(f"   Denuncias fallidas: {self.bot.denuncias_fallidas}\n")
+                self.escribir_consola("="*60 + "\n")
+
+                self.label_estado.config(
+                    text=f"●  Estado: Completado - {self.bot.denuncias_exitosas} denuncias registradas (sin PDF)",
+                    fg="#f59e0b"
+                )
+            else:
+                self.label_estado.config(text="●  Estado: Proceso finalizado", fg="#6b7280")
+
+        except Exception as e:
+            self.escribir_consola(f"\n❌ ERROR CRÍTICO: {str(e)}\n")
+            messagebox.showerror("Error", f"Error crítico en el bot:\n{str(e)}")
+            self.label_estado.config(text="●  Estado: Error en proceso", fg=self.COLOR_PELIGRO)
+
+        finally:
+            self.btn_iniciar.config(state="normal")
+            self.btn_sin_pdf.config(state="normal")
             self.btn_cancelar.config(state="disabled")
             self.proceso_activo = False
 
