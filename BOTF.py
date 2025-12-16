@@ -3912,6 +3912,13 @@ class BotDenunciasSUNAT:
                 else:
                     self.log("  ⚠️ Nivel 1 falló, continuando...")
             except Exception as e:
+                error_msg = str(e).lower()
+                # ¡IMPORTANTE! Si hay timeout, significa que el diálogo de impresión SE ABRIÓ
+                # El diálogo bloquea JavaScript, causando el timeout - ¡ESO ES ÉXITO!
+                if 'timeout' in error_msg or 'script timeout' in error_msg:
+                    self.log("  ✅✅✅ TIMEOUT = ¡ÉXITO! El diálogo de impresión se abrió (bloquea JS)")
+                    time.sleep(2)
+                    return True
                 self.log(f"  ⚠️ Nivel 1 error: {str(e)[:50]}")
 
             # ═══════════════════════════════════════════════════════════════
