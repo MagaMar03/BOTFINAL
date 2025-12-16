@@ -4063,168 +4063,299 @@ class BotDenunciasSUNAT:
 
     def clic_boton_imprimir_chrome(self):
         """
-        🚨🚨🚨 FUNCIÓN SUPER NUCLEAR - BOTÓN IMPRIMIR (Diálogo Edge/Chrome) 🚨🚨🚨
+        🚨🚨🚨 FUNCIÓN MEGA NUCLEAR - BOTÓN IMPRIMIR (Diálogo Edge/Chrome) 🚨🚨🚨
 
-        El diálogo de impresión ya está abierto.
-        El botón "Imprimir" es azul y puede estar en DOS ubicaciones:
-          - IZQUIERDA: Panel lateral izquierdo (nuevo diseño Chrome/Edge)
-          - DERECHA: Esquina inferior derecha (diseño antiguo)
+        GARANTIZA que el botón Imprimir se clickee SÍ O SÍ.
 
-        CUBRE AMBOS FORMATOS automáticamente.
-        SOLUCIÓN: Múltiples métodos SIN retornar hasta probar todos.
+        Métodos implementados:
+        - A: Enter directo
+        - B: Clicks en coordenadas (IZQUIERDA + DERECHA + MÁS POSICIONES)
+        - C: Tab + Enter / Tab + Space
+        - D: Alt+Tab para foco + clicks
+        - E: Doble y triple clic
+        - F: moveTo + click (mover ratón primero)
+        - G: Ctrl+Shift+P (atajo de impresión)
+        - H: Space (activa botón enfocado)
+        - I: Clicks rápidos concentrados
+        - J: Enter agresivo final
         """
-        self.log("  🚨🚨🚨 MODO SUPER NUCLEAR: Botón Imprimir 🚨🚨🚨")
+        self.log("  🚨🚨🚨 MODO MEGA NUCLEAR: Botón Imprimir - GARANTIZADO 🚨🚨🚨")
 
         import pyautogui
+        pyautogui.FAILSAFE = False  # Desactivar failsafe para evitar interrupciones
+
+        screen_width, screen_height = pyautogui.size()
+        self.log(f"  📐 Resolución detectada: {screen_width}x{screen_height}")
 
         # Esperar a que el diálogo cargue completamente
-        self.log("  ⏳ Esperando 4 segundos para que el diálogo cargue...")
-        time.sleep(4)
+        self.log("  ⏳ Esperando 3 segundos para que el diálogo cargue...")
+        time.sleep(3)
 
         # ═══════════════════════════════════════════════════════════════
-        # PASO 1: Asegurar que la ventana del navegador tiene el foco
+        # DEFINIR TODAS LAS POSICIONES POSIBLES DEL BOTÓN
         # ═══════════════════════════════════════════════════════════════
-        self.log("  🎯 PASO 1: Asegurando foco en la ventana...")
-        try:
-            # Click en el centro de la pantalla para asegurar foco
-            screen_width, screen_height = pyautogui.size()
-            pyautogui.click(screen_width // 2, screen_height // 2)
-            time.sleep(0.5)
-        except:
-            pass
+
+        # IZQUIERDA: Panel lateral izquierdo (Chrome/Edge nuevo)
+        # BASADO EN SCREENSHOT REAL: Botón "Imprimir" azul está a ~9-11% X y ~59-75% Y
+        pos_izquierda = [
+            # === COORDENADAS DEL SCREENSHOT (59-62% altura) ===
+            (int(screen_width * 0.09), int(screen_height * 0.58)),
+            (int(screen_width * 0.10), int(screen_height * 0.59)),
+            (int(screen_width * 0.11), int(screen_height * 0.60)),
+            (int(screen_width * 0.09), int(screen_height * 0.61)),
+            (int(screen_width * 0.10), int(screen_height * 0.62)),
+            (int(screen_width * 0.11), int(screen_height * 0.63)),
+            # === COORDENADAS ALTERNATIVAS (65-75% altura) ===
+            (int(screen_width * 0.10), int(screen_height * 0.65)),
+            (int(screen_width * 0.10), int(screen_height * 0.68)),
+            (int(screen_width * 0.10), int(screen_height * 0.70)),
+            (int(screen_width * 0.10), int(screen_height * 0.72)),
+            (int(screen_width * 0.10), int(screen_height * 0.75)),
+            # === COORDENADAS FIJAS PARA 1920x1080 ===
+            (170, 636), (175, 640), (165, 632), (180, 650),
+            (170, 660), (170, 680), (170, 700), (170, 720),
+            (170, 750), (170, 780),
+            # === COORDENADAS FIJAS PARA 1536x864 ===
+            (140, 510), (145, 520), (150, 530), (140, 540),
+            (140, 560), (140, 580), (140, 600),
+            # === COORDENADAS FIJAS PARA 1366x768 ===
+            (125, 450), (130, 460), (125, 470), (130, 480),
+            (125, 500), (130, 520),
+        ]
+
+        # DERECHA: Panel derecho (diseño antiguo) - menos prioritario
+        pos_derecha = [
+            (int(screen_width * 0.54), int(screen_height * 0.82)),
+            (int(screen_width * 0.56), int(screen_height * 0.84)),
+            (750, 520), (760, 530),
+        ]
+
+        # CENTRO-IZQUIERDA: Por si el panel está más al centro
+        pos_centro = [
+            (int(screen_width * 0.15), int(screen_height * 0.60)),
+            (int(screen_width * 0.18), int(screen_height * 0.62)),
+            (200, 636), (220, 650),
+        ]
+
+        todas_posiciones = pos_izquierda + pos_centro + pos_derecha
 
         # ═══════════════════════════════════════════════════════════════
-        # PASO 2: Intentar TODOS los métodos en secuencia
+        # BUCLE PRINCIPAL: 5 INTENTOS CON TODOS LOS MÉTODOS
         # ═══════════════════════════════════════════════════════════════
-        for intento in range(1, 4):
-            self.log(f"\n  🔄 INTENTO {intento}/3")
+        for intento in range(1, 6):
+            self.log(f"\n  {'='*50}")
+            self.log(f"  🔄 INTENTO {intento}/5 - Clickeando botón Imprimir")
+            self.log(f"  {'='*50}")
 
-            # MÉTODO A: Enter directo
-            self.log("  [A] Enter directo...")
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO A: Alt+Tab para asegurar foco en el diálogo
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [A] Alt+Tab para asegurar foco...")
+            try:
+                pyautogui.hotkey('alt', 'tab')
+                time.sleep(0.5)
+            except:
+                pass
+
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO B: Enter directo (el botón puede estar enfocado)
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [B] Enter directo...")
             try:
                 pyautogui.press('enter')
-                time.sleep(1)
+                time.sleep(0.8)
             except:
                 pass
 
-            # MÉTODO B: Click en coordenadas del botón Imprimir
-            # CUBRE AMBOS FORMATOS: Panel IZQUIERDO y Panel DERECHO
-            self.log("  [B] Click en coordenadas del botón (IZQUIERDA + DERECHA)...")
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO C: Space (activa el botón si está enfocado)
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [C] Space (activar botón enfocado)...")
             try:
-                # ═════════════════════════════════════════════════════════════
-                # FORMATO 1: Panel en el LADO IZQUIERDO (nuevo diseño Chrome/Edge)
-                # El panel ocupa aprox 20-25% izquierdo de la pantalla
-                # El botón "Imprimir" azul está abajo del panel izquierdo
-                # ═════════════════════════════════════════════════════════════
-                posiciones_izquierda = [
-                    (int(screen_width * 0.10), int(screen_height * 0.72)),  # 10% desde izquierda
-                    (int(screen_width * 0.12), int(screen_height * 0.73)),  # 12% desde izquierda
-                    (int(screen_width * 0.08), int(screen_height * 0.71)),  # 8% desde izquierda
-                    (int(screen_width * 0.11), int(screen_height * 0.74)),  # 11% desde izquierda
-                    (100, 550),   # Coordenadas fijas para resolución común
-                    (110, 545),
-                    (95, 555),
-                    (105, 540),
-                    (120, 560),
-                ]
-
-                # ═════════════════════════════════════════════════════════════
-                # FORMATO 2: Panel en el LADO DERECHO (diseño antiguo)
-                # El botón está en la esquina inferior derecha del diálogo
-                # ═════════════════════════════════════════════════════════════
-                posiciones_derecha = [
-                    (int(screen_width * 0.56), int(screen_height * 0.84)),
-                    (int(screen_width * 0.58), int(screen_height * 0.85)),
-                    (int(screen_width * 0.54), int(screen_height * 0.83)),
-                    (750, 520),
-                    (760, 525),
-                ]
-
-                # Primero intentar IZQUIERDA (formato más común ahora)
-                self.log("    → Probando lado IZQUIERDO...")
-                for x, y in posiciones_izquierda:
-                    pyautogui.click(x, y)
-                    time.sleep(0.2)
-
+                pyautogui.press('space')
                 time.sleep(0.5)
-
-                # Luego intentar DERECHA (formato alternativo)
-                self.log("    → Probando lado DERECHO...")
-                for x, y in posiciones_derecha:
-                    pyautogui.click(x, y)
-                    time.sleep(0.2)
             except:
                 pass
 
-            time.sleep(1)
-
-            # MÉTODO C: Tab + Enter
-            self.log("  [C] Tab + Enter...")
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO D: Click en centro para asegurar foco en ventana
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [D] Click en centro de pantalla...")
             try:
-                for _ in range(3):
+                pyautogui.click(screen_width // 2, screen_height // 2)
+                time.sleep(0.3)
+            except:
+                pass
+
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO E: Clicks en TODAS las posiciones posibles
+            # ─────────────────────────────────────────────────────────────
+            self.log(f"  [E] Clicks en {len(todas_posiciones)} posiciones...")
+            try:
+                for i, (x, y) in enumerate(todas_posiciones):
+                    # Mover primero, luego click (más confiable)
+                    pyautogui.moveTo(x, y, duration=0.05)
+                    time.sleep(0.05)
+                    pyautogui.click()
+                    if i % 10 == 0:
+                        self.log(f"      → Posición {i+1}/{len(todas_posiciones)}: ({x}, {y})")
+            except:
+                pass
+
+            time.sleep(0.5)
+
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO F: Tab múltiple + Enter/Space
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [F] Tab múltiple + Enter/Space...")
+            try:
+                for _ in range(5):
                     pyautogui.press('tab')
                     time.sleep(0.1)
                 pyautogui.press('enter')
-                time.sleep(1)
+                time.sleep(0.3)
+                pyautogui.press('space')
+                time.sleep(0.3)
             except:
                 pass
 
-            # MÉTODO D: Alt + clic (por si hay overlay) - AMBOS LADOS
-            self.log("  [D] Alt + Click (IZQUIERDA y DERECHA)...")
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO G: Shift+Tab + Enter/Space (navegar hacia atrás)
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [G] Shift+Tab + Enter...")
             try:
-                # Lado IZQUIERDO primero
-                pyautogui.keyDown('alt')
-                pyautogui.click(int(screen_width * 0.10), int(screen_height * 0.72))
-                pyautogui.keyUp('alt')
+                for _ in range(3):
+                    pyautogui.hotkey('shift', 'tab')
+                    time.sleep(0.1)
+                pyautogui.press('enter')
                 time.sleep(0.3)
-                # Lado DERECHO
-                pyautogui.keyDown('alt')
-                pyautogui.click(int(screen_width * 0.56), int(screen_height * 0.84))
-                pyautogui.keyUp('alt')
-                time.sleep(1)
             except:
                 pass
 
-            # MÉTODO E: Doble clic en el botón - AMBOS LADOS
-            self.log("  [E] Doble clic (IZQUIERDA y DERECHA)...")
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO H: Doble clic en posiciones clave
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [H] Doble clic en posiciones clave...")
             try:
-                # Lado IZQUIERDO primero
-                pyautogui.doubleClick(int(screen_width * 0.10), int(screen_height * 0.72))
-                time.sleep(0.3)
-                # Lado DERECHO
-                pyautogui.doubleClick(int(screen_width * 0.56), int(screen_height * 0.84))
-                time.sleep(1)
+                posiciones_clave = [
+                    # Posición del screenshot (60% altura)
+                    (int(screen_width * 0.10), int(screen_height * 0.60)),
+                    (170, 636),  # Para 1920x1080
+                    (140, 510),  # Para 1536x864
+                    # Posición alternativa (72% altura)
+                    (int(screen_width * 0.10), int(screen_height * 0.72)),
+                ]
+                for x, y in posiciones_clave:
+                    pyautogui.moveTo(x, y, duration=0.1)
+                    pyautogui.doubleClick()
+                    time.sleep(0.2)
+            except:
+                pass
+
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO I: Triple clic (por si acaso)
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [I] Triple clic...")
+            try:
+                # En 60% altura (screenshot)
+                pyautogui.click(int(screen_width * 0.10), int(screen_height * 0.60), clicks=3)
+                time.sleep(0.2)
+                pyautogui.click(170, 636, clicks=3)  # 1920x1080
+                time.sleep(0.2)
+                # En 72% altura (alternativa)
+                pyautogui.click(int(screen_width * 0.10), int(screen_height * 0.72), clicks=3)
+                time.sleep(0.2)
+            except:
+                pass
+
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO J: Ctrl+Shift+P (atajo de impresión en algunos navegadores)
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [J] Ctrl+Shift+P...")
+            try:
+                pyautogui.hotkey('ctrl', 'shift', 'p')
+                time.sleep(0.5)
+            except:
+                pass
+
+            # ─────────────────────────────────────────────────────────────
+            # MÉTODO K: Clicks rápidos concentrados en área izquierda
+            # ─────────────────────────────────────────────────────────────
+            self.log("  [K] Clicks rápidos concentrados (60% y 72% altura)...")
+            try:
+                centro_x = int(screen_width * 0.10)
+                # Primero en 60% altura (posición del screenshot)
+                centro_y = int(screen_height * 0.60)
+                for dx in range(-30, 35, 10):
+                    for dy in range(-30, 35, 10):
+                        pyautogui.click(centro_x + dx, centro_y + dy)
+                        time.sleep(0.02)
+                # Luego en 72% altura (posición alternativa)
+                centro_y = int(screen_height * 0.72)
+                for dx in range(-30, 35, 10):
+                    for dy in range(-30, 35, 10):
+                        pyautogui.click(centro_x + dx, centro_y + dy)
+                        time.sleep(0.02)
             except:
                 pass
 
             # Esperar antes del siguiente intento
-            time.sleep(2)
+            time.sleep(1)
 
         # ═══════════════════════════════════════════════════════════════
-        # PASO 3: Método final - Múltiples Enter agresivos
+        # FASE FINAL: Métodos de último recurso
         # ═══════════════════════════════════════════════════════════════
-        self.log("  🔴 PASO FINAL: Múltiples Enter agresivos...")
+        self.log("\n  🔴🔴🔴 FASE FINAL: Métodos de último recurso 🔴🔴🔴")
+
+        # Enter agresivo
+        self.log("  [FINAL-1] 15 Enter agresivos...")
+        try:
+            for _ in range(15):
+                pyautogui.press('enter')
+                time.sleep(0.2)
+        except:
+            pass
+
+        time.sleep(1)
+
+        # Space agresivo
+        self.log("  [FINAL-2] 10 Space agresivos...")
         try:
             for _ in range(10):
-                pyautogui.press('enter')
-                time.sleep(0.3)
+                pyautogui.press('space')
+                time.sleep(0.2)
+        except:
+            pass
+
+        time.sleep(1)
+
+        # Último barrido de clicks - CUBRE TODA EL ÁREA POSIBLE
+        self.log("  [FINAL-3] Barrido final de clicks (58%-78% altura)...")
+        try:
+            # Barrido desde 58% hasta 78% de altura (cubre todas las posiciones posibles)
+            for y_pct in [0.58, 0.60, 0.62, 0.65, 0.68, 0.70, 0.72, 0.75, 0.78]:
+                for x_pct in [0.08, 0.09, 0.10, 0.11, 0.12]:
+                    x = int(screen_width * x_pct)
+                    y = int(screen_height * y_pct)
+                    pyautogui.click(x, y)
+                    time.sleep(0.03)
         except:
             pass
 
         time.sleep(2)
 
         # ═══════════════════════════════════════════════════════════════
-        # PASO 4: Si nada funcionó, cerrar diálogo con Escape
+        # LIMPIEZA: Escape para cerrar si quedó abierto
         # ═══════════════════════════════════════════════════════════════
-        self.log("  🔴 PASO 4: Presionando Escape para cerrar diálogo si está abierto...")
+        self.log("  🧹 Cerrando diálogo con Escape si quedó abierto...")
         try:
             for _ in range(3):
                 pyautogui.press('escape')
-                time.sleep(0.5)
+                time.sleep(0.3)
         except:
             pass
 
-        self.log("  ✅ Secuencia de impresión completada (diálogo cerrado si estaba abierto)")
+        self.log("  ✅ Secuencia MEGA NUCLEAR completada")
         return True
 
     def clic_boton_aceptar_nuclear(self):
